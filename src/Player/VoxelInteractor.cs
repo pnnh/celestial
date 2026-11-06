@@ -52,10 +52,12 @@ public partial class VoxelInteractor : Node3D
         {
             if (mouseBtn.ButtonIndex == MouseButton.Left)
             {
+                Player?.ToolManager?.PlaySwing();
                 PerformDig();
             }
             else if (mouseBtn.ButtonIndex == MouseButton.Right)
             {
+                Player?.ToolManager?.PlaySwing();
                 PerformPlace();
             }
         }

@@ -25,6 +25,13 @@
 - 严防仓库体积膨胀：所有二进制资源（.blend, .fbx, .glb, .png, .wav 等）必须纳入 Git LFS。
 - 临时产物与烘焙缓存（如 .godot、C# bin/obj、Blender .blend1）严禁入库。
 
+### VI. 视觉与艺术风格宪章 (Stylized Anime Fantasy / 赛璐璐手绘幻想风)
+- **核心基调**：借鉴吉卜力与日系清爽手绘幻想风格（Stylized Anime Cel-Shading）。追求明媚开阔的暖阳蓝天、翠绿草甸、古铜与风化石质感；光影采用二阶平滑卡通着色（Toon Shading），杜绝高噪点写实材质。
+- **版权规避原则 (Anti-Infringement Guardrails)**：
+  - 严格禁止直接模仿或借用《塞尔达传说：旷野之息》的专有侵权符号（如希卡之眼、希卡石板、神庙橙蓝电路、大师剑造型、特定角色发型面孔）。
+  - 确立 Celestial 独有世界观视觉符号：**星穹古阵（Celestial Runes）**、**以太幽蓝晶石（Aether Crystals）**、**天界漫游者（Celestial Wanderer）**装束。
+- **AI 资产提示词约束**：所有通过 Ludo AI 或 Blender MCP 调用的提示词，必须注入赛璐璐动漫风与正负词典约束，保证角色、地表、装备三者美术语言高度统一。
+
 ## 开发工作流与治理 (Development & Governance)
 
 - **开发范式**：遵循 Spec-Kit 流程（Specification -> Plan -> Tasks -> Implement -> Verification）。

@@ -40,9 +40,9 @@ public partial class HUDOverlay : CanvasLayer
             OffsetTop = 20,
             Text = "Celestial: 传统3D地形 + 局部体素混合世界 (MVP)\n" +
                    "------------------------------------------\n" +
-                   "[WASD] 移动 | [空格] 跳跃 | [鼠标] 视角 (ESC释放)\n" +
-                   "[鼠标左键] 挖掘方块 (触底传统地形阻隔) | [鼠标右键] 放置\n" +
-                   "[1-5] 切换方块 | [F3] 调试监控面板 | [F5] 快速存档 | [F9] 快速读档"
+                   "[WASD] 移动 | [空格] 跳跃 | [Shift] 疾跑 | [Ctrl] 潜行\n" +
+                   "[V] 切换第1/第3人称过肩视角 | [鼠标左键] 挖掘 | [鼠标右键] 放置\n" +
+                   "[1-5] 切换手持方块/工具 | [F3] 调试面板 | [F5] 存档 | [F9] 读档"
         };
         _infoLabel.AddThemeFontSizeOverride("font_size", 15);
         _infoLabel.AddThemeColorOverride("font_color", new Color(0.95f, 0.95f, 0.95f));
