@@ -1,0 +1,72 @@
+scenes/main.tscn
+  h_6465a203f88bd5 1,4-24,30,34-50,52-53,55-56
+scenes/prefabs/player.tscn
+  h_6465a203f88bd5 1-25
+specs/001-hybrid-voxel-mvp/tasks.md
+  h_6465a203f88bd5 20,29,33,37,41,50,54,58,62
+src/Core/Constants.cs
+  h_6465a203f88bd5 1-51
+src/Core/Constants.cs.uid
+  h_6465a203f88bd5 1
+src/Core/GameManager.cs
+  h_6465a203f88bd5 10
+src/Core/HUDOverlay.cs
+  h_6465a203f88bd5 1-68
+src/Core/HUDOverlay.cs.uid
+  h_6465a203f88bd5 1
+src/Core/TestRunner.cs
+  h_6465a203f88bd5 1-89
+src/Core/TestRunner.cs.uid
+  h_6465a203f88bd5 1
+src/Player/PlayerController.cs
+  h_6465a203f88bd5 1-83
+src/Player/PlayerController.cs.uid
+  h_6465a203f88bd5 1
+src/Player/VoxelInteractor.cs
+  h_6465a203f88bd5 1-150
+src/Player/VoxelInteractor.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/IHeightSampler.cs
+  h_6465a203f88bd5 1-25
+src/Terrain/IHeightSampler.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/SimpleProceduralHeightmap.cs
+  h_6465a203f88bd5 1-129
+src/Terrain/SimpleProceduralHeightmap.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/StaticTerrain.cs
+  h_6465a203f88bd5 1-80
+src/Terrain/StaticTerrain.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/ChunkCoord.cs
+  h_6465a203f88bd5 1-99
+src/Voxel/ChunkCoord.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/ChunkMesher.cs
+  h_6465a203f88bd5 1-170
+src/Voxel/ChunkMesher.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/VoxelChunk.cs
+  h_6465a203f88bd5 1-113
+src/Voxel/VoxelChunk.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/VoxelType.cs
+  h_6465a203f88bd5 1-44
+src/Voxel/VoxelType.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/VoxelWorld.cs
+  h_6465a203f88bd5 1-234
+src/Voxel/VoxelWorld.cs.uid
+  h_6465a203f88bd5 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "69939de2ee6d71101d9b66d02bfe8b2daabd9089",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
