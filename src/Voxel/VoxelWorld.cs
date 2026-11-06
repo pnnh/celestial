@@ -23,8 +23,16 @@ public partial class VoxelWorld : Node3D
 
     public override void _Ready()
     {
+        Texture2D? atlasTexture = null;
+        if (ResourceLoader.Exists("res://assets/textures/voxel_atlas.png"))
+        {
+            atlasTexture = ResourceLoader.Load<Texture2D>("res://assets/textures/voxel_atlas.png");
+        }
+
         _sharedVoxelMaterial = new StandardMaterial3D
         {
+            AlbedoTexture = atlasTexture,
+            TextureFilter = BaseMaterial3D.TextureFilterEnum.NearestWithMipmaps,
             VertexColorUseAsAlbedo = true,
             Roughness = 0.85f,
             Metallic = 0.05f

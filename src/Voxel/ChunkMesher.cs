@@ -72,7 +72,6 @@ public static class ChunkMesher
                         continue;
                     }
 
-                    Color voxelColor = currentType.GetDebugColor();
                     Vector3 localBlockPos = new(lx, ly, lz);
 
                     // 检查 6 个面的相邻邻居
@@ -99,7 +98,7 @@ public static class ChunkMesher
                         // 如果邻居非实心（是空气），则当前面可见，需要渲染
                         if (!neighborType.IsSolid())
                         {
-                            AddFace(face, localBlockPos, voxelColor, vertices, normals, uvs, colors, indices);
+                            AddFace(face, currentType, localBlockPos, vertices, normals, uvs, colors, indices);
                         }
                     }
                 }
@@ -124,10 +123,28 @@ public static class ChunkMesher
         return mesh;
     }
 
+    private static (int col, int row) GetAtlasTile(VoxelType type, int faceIndex)
+    {
+        return type switch
+        {
+            VoxelType.Grass => faceIndex switch
+            {
+                2 => (0, 0), // Top (+Y): Grass
+                3 => (1, 0), // Bottom (-Y): Dirt
+                _ => (2, 1)  // Sides (+X, -X, +Z, -Z): Grass Side
+            },
+            VoxelType.Dirt => (1, 0),     // Dirt (All sides)
+            VoxelType.Wood => (2, 0),     // Wood Planks
+            VoxelType.Stone => (0, 1),    // Ancient Stone Tile
+            VoxelType.Bedrock => (1, 1),  // Ancient Rune Stone
+            _ => (0, 0)
+        };
+    }
+
     private static void AddFace(
         int faceIndex,
+        VoxelType type,
         Vector3 blockPos,
-        Color color,
         List<Vector3> vertices,
         List<Vector3> normals,
         List<Vector2> uvs,
@@ -143,17 +160,36 @@ public static class ChunkMesher
         {
             2 => 1.0f,  // Top (+Y): 最亮
             3 => 0.55f, // Bottom (-Y): 最暗
-            4 or 5 => 0.85f,
-            _ => 0.75f
+            4 or 5 => 0.88f,
+            _ => 0.78f
         };
-        Color shadedColor = new(color.R * shade, color.G * shade, color.B * shade, color.A);
+        Color shadedColor = new(shade, shade, shade, 1.0f);
+
+        // 图集 3 列 x 2 行
+        var (col, row) = GetAtlasTile(type, faceIndex);
+        const float totalCols = 3.0f;
+        const float totalRows = 2.0f;
+        const float eps = 0.002f;
+
+        float u0 = (col + eps) / totalCols;
+        float u1 = (col + 1.0f - eps) / totalCols;
+        float v0 = (row + eps) / totalRows;
+        float v1 = (row + 1.0f - eps) / totalRows;
+
+        Vector2[] tileUvs =
+        [
+            new(u0, v1),
+            new(u1, v1),
+            new(u1, v0),
+            new(u0, v0)
+        ];
 
         for (int i = 0; i < 4; i++)
         {
             Vector3 v = blockPos + CubeVertices[vertexIndices[i]];
             vertices.Add(v);
             normals.Add(normal);
-            uvs.Add(FaceUVs[i]);
+            uvs.Add(tileUvs[i]);
             colors.Add(shadedColor);
         }
 

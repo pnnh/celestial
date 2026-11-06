@@ -67,6 +67,11 @@ Library/
 .agents/**/.env*
 .claude/**/secrets*
 .claude/**/.env*
+.env
+.env.*
+*.key
+*.secret
+tools/
 
 # Design & texture working directories (high-res sources / intermediate files)
 design/**/__pycache__/

@@ -48,6 +48,28 @@ public partial class HUDOverlay : CanvasLayer
         _infoLabel.AddThemeColorOverride("font_color", new Color(0.95f, 0.95f, 0.95f));
         AddChild(_infoLabel);
 
+        // Ludo.ai 生成的水晶采矿镐装备图标
+        Texture2D? pickaxeTex = GD.Load<Texture2D>("res://assets/textures/ludo/crystal_pickaxe_icon.png");
+        if (pickaxeTex != null)
+        {
+            TextureRect toolIcon = new()
+            {
+                Name = "EquippedToolIcon",
+                Texture = pickaxeTex,
+                ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+                AnchorLeft = 1.0f,
+                AnchorRight = 1.0f,
+                AnchorTop = 1.0f,
+                AnchorBottom = 1.0f,
+                OffsetLeft = -100,
+                OffsetRight = -20,
+                OffsetTop = -100,
+                OffsetBottom = -20
+            };
+            AddChild(toolIcon);
+        }
+
         _interactor = GetTree().Root.FindChild("VoxelInteractor", true, false) as VoxelInteractor;
     }
 

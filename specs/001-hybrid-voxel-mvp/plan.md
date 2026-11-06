@@ -6,30 +6,37 @@
 
 ## Proposed Changes
 
-### 1. Core Architecture & Project Layout (`src/`)
+### 1. Core Architecture & Project Layout (`src/` & `assets/`)
 
 ```
 src/
 ├── Core/
 │   ├── GameManager.cs               # 游戏主入口与场景协调
-│   └── Constants.cs                 # Chunk 尺寸 (16)、世界网格全局常量
+│   ├── Constants.cs                 # Chunk 尺寸 (16)、世界网格全局常量
+│   ├── DebugOverlay.cs              # 3D 瞄准线框与性能实时监视器 (F3)
+│   ├── HUDOverlay.cs                # 屏幕快捷操作指引、方块指示器与装备栏图标
+│   └── TestRunner.cs                # 游戏初始化核心数学与序列化自测套件
 ├── Terrain/
 │   ├── IHeightSampler.cs            # 传统地形高度采样接口
-│   ├── StaticTerrain.cs             # 传统地形节点封装与采样器实现
+│   ├── StaticTerrain.cs             # 传统地形节点封装、采样器实现与草地贴图绑定
 │   └── SimpleProceduralHeightmap.cs # 基于数学曲线/噪声的小型测试地形生成器
 ├── Voxel/
-│   ├── VoxelType.cs                 # 方块枚举定义 (Air, Dirt, Stone, Bedrock, Wood)
+│   ├── VoxelType.cs                 # 方块枚举定义 (Air, Grass, Dirt, Stone, Bedrock, Wood)
 │   ├── ChunkCoord.cs                # 结构体：三维 Chunk 坐标与索引哈希
 │   ├── VoxelChunk.cs                # 核心 Chunk 数据容器 (16x16x16)
-│   ├── VoxelWorld.cs                # Chunk 字典、区域触发、跨 Chunk 坐标转换
-│   ├── ChunkMesher.cs               # 面剔除/贪婪网格化 ArrayMesh 生成器
-│   └── VoxelVolume.cs               # 局部体素启用区域触发器
+│   ├── VoxelWorld.cs                # Chunk 字典、区域触发、Texture Atlas 材质绑定
+│   └── ChunkMesher.cs               # 面剔除、定向 UV 贴图与 ArrayMesh 生成器
 ├── Player/
-│   ├── PlayerController.cs          # 第一人称移动、跳跃、重力控制
+│   ├── PlayerController.cs          # 第一人称移动、跳跃、重力控制与数字键 1-5 切换方块
 │   └── VoxelInteractor.cs           # 视线射线检测、挖掘触底阻隔、方块放置
 └── Persistence/
     ├── ChunkDelta.cs                # Chunk 差异数据模型
-    └── SimpleSaveManager.cs         # JSON/二进制轻量差异存读档管理器
+    └── SimpleSaveManager.cs         # JSON/二进制轻量差异存读档管理器 (F5/F9)
+
+assets/
+└── textures/
+    ├── voxel_atlas.png              # 3x2 高性能体素纹理图集 (LFS 纳管)
+    └── ludo/                        # 生成的原始高分辨率贴图库与装备图标
 ```
 
 ---
@@ -54,13 +61,19 @@ public interface IHeightSampler
 }
 ```
 
-### 2.2 体素数据结构与面剔除网格生成 (`ChunkMesher`)
+### 2.2 体素数据结构、面剔除网格与纹理图集管线 (`ChunkMesher`)
 - **存储**：`byte[16 * 16 * 16]` 扁平化连续数组存储方块 ID。
 - **面剔除（Face Culling）**：
   - 遍历 Chunk 内每个有效非空方块，检查其 6 个相邻方向（$X \pm 1, Y \pm 1, Z \pm 1$）。
   - 若邻居方块为空气（Air）或超出当前 Chunk 且邻近 Chunk 为空气，则生成该方向的 2 个三角形面（4 个顶点、6 个索引）。
   - 若底部接触传统地形表面，则通过采样高度生成贴合底面。
-- **网格输出**：`Godot.ArrayMesh`，包含 `Vector3[]` 顶点、`Vector3[]` 法线、`Vector2[]` UV、`int[]` 索引。
+- **纹理图集与多面定向 UV 映射（Texture Atlas UVs）**：
+  - 统一采用 3×2 网格图集 (`res://assets/textures/voxel_atlas.png`)。
+  - 草方块（Grass）顶面映射草皮 (0, 0)，底面映射泥土 (1, 0)，四周侧面映射垂草泥土截面 (2, 1)。
+  - 泥土 (1, 0)、木板 (2, 0)、石砖 (0, 1)、远古符文基岩 (1, 1) 全表面各向同性映射。
+  - UV 边界增加微小抗漏色偏移（$\epsilon = 0.002$），材质过滤器设为 `NearestWithMipmaps`。
+  - 结合面朝向引入简易方向性环境遮蔽（Directional AO）：顶面亮度 1.0、侧面 0.88/0.78、底面 0.55。
+- **网格输出**：`Godot.ArrayMesh`，包含 `Vector3[]` 顶点、`Vector3[]` 法线、`Vector2[]` UV、`Color[]` 明暗顶点色、`int[]` 索引。
 - **碰撞输出**：赋值给 `ConcavePolygonShape3D.Faces`。
 
 ### 2.3 挖掘触底机制

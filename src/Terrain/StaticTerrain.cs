@@ -38,9 +38,17 @@ public partial class StaticTerrain : Node3D
         // 1. 生成视觉 Mesh
         ArrayMesh mesh = procedural.GenerateMesh(-TerrainExtent, TerrainExtent, -TerrainExtent, TerrainExtent, GridStep);
 
-        // 设置纯顶点颜色材质
+        Texture2D? terrainTex = null;
+        if (ResourceLoader.Exists("res://assets/textures/ludo/lush_grass_soil.png"))
+        {
+            terrainTex = ResourceLoader.Load<Texture2D>("res://assets/textures/ludo/lush_grass_soil.png");
+        }
+
+        // 设置传统 3D 地形材质（若存在草地纹理则启用无缝平铺，与体素草地方块风格完全统一）
         StandardMaterial3D material = new()
         {
+            AlbedoTexture = terrainTex,
+            TextureFilter = BaseMaterial3D.TextureFilterEnum.LinearWithMipmaps,
             VertexColorUseAsAlbedo = true,
             Roughness = 0.9f,
             Metallic = 0.05f

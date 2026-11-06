@@ -77,7 +77,19 @@
   - 描述：仅保存与默认地形不一致的修改方块，支持 JSON 轻量序列化。支持 F5 快捷保存与 F9 快捷加载。
   - 验证：单元测试通过，挖掘和放置方块后按 F5，重新载入后修改完全保留。
 - [x] **TASK-015**: 结合 Blender MCP 与 Ludo AI 丰富测试场景美术资产
-  - 文件：`assets/models/ancient_monolith.glb`, `assets/textures/*.png`
-  - 描述：通过在线 Blender MCP 程序化生成远古图腾柱（Ancient Monolith）并导出 GLB 资产，结合程序化纹理库生成泥土/石头/木材/沙子贴图，全部受 Git LFS 纳管。
+  - 文件：`assets/models/ancient_monolith.glb`, `assets/textures/ludo/*.png`
+  - 描述：通过在线 Blender MCP 程序化生成远古图腾柱（Ancient Monolith）并导出 GLB 资产，结合 Ludo AI 生成符文石、石砖、草地泥土与水晶镐图标，全部受 Git LFS 纳管。
   - 验证：Godot 正确导入 GLB 模型并将其摆放在传统 3D 地形上，验证混合世界资产共存。
+- [x] **TASK-016**: 构建体素纹理图集并实现多面定向 UV 贴图与地形材质统一样式
+  - 文件：`assets/textures/voxel_atlas.png`, `src/Voxel/ChunkMesher.cs`, `src/Voxel/VoxelWorld.cs`, `src/Terrain/StaticTerrain.cs`
+  - 描述：构建 3×2 纹理图集并集成草皮、泥土、木板、古代石砖与符文基岩；在 `ChunkMesher` 中实现多面定向 UV 映射与简易 AO 明暗；底层传统地形绑定草地泥土贴图消除白模。
+  - 验证：方块与地表告别纯色白模，呈现清晰游戏质感，单 Chunk 维持 1 个 Draw Call。
+- [x] **TASK-017**: 实现游戏 HUD 操作指引、当前方块切换指示与装备栏图标
+  - 文件：`src/Core/HUDOverlay.cs`, `src/Player/PlayerController.cs`
+  - 描述：在屏幕展示按键指引，支持数字键 1-5 动态切换手持方块类型并在 HUD 实时响应，右下角渲染手持水晶镐装备图标。
+  - 验证：按数字键 1~5 自由切换方块并在放置时生效，右下角水晶镐图标清晰可见。
+- [x] **TASK-018**: 实现引擎内启动自测执行器 (In-Engine TestRunner)
+  - 文件：`src/Core/TestRunner.cs`, `src/Core/GameManager.cs`
+  - 描述：在场景就绪时自动执行核心坐标索引、高度图采样、跨界负数求余及差异存档 JSON 序列化自测。
+  - 验证：游戏启动或 Headless 执行时输出全部绿灯自测日志，保障核心契约与底层数学无回归。
 
