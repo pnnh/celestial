@@ -1,0 +1,76 @@
+# ==============================================================================
+# Godot 4 & C# (.NET) .gitignore
+# ==============================================================================
+
+# Godot 4 cache and imported resources
+.godot/
+*.translation
+
+# Godot export binaries & packages
+build/
+export/
+*.pck
+*.apk
+*.aab
+*.ipa
+*.exe
+*.app
+crash_dumps/
+
+# .NET / C# artifacts
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+
+# Rider / JetBrains IDE
+.idea/
+*.sln.iml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# macOS / OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.local/
+Library/
+
+# Blender temporary & backup files
+*.blend1
+*.blend2
+*.blend3
+*.blend4
+*.blend5
+
+# Logs & temporary files
+*.log
+*.tmp
+*.bak
+.tmp-*/
+
+# Agent credentials & secrets protection
+.agents/**/secrets*
+.agents/**/.env*
+.claude/**/secrets*
+.claude/**/.env*
+
+# Design & texture working directories (high-res sources / intermediate files)
+design/**/__pycache__/
+design/**/*.pyc
+design/**/.venv/
+design/**/work/
+assets_raw/work/
