@@ -41,9 +41,8 @@ public partial class HUDOverlay : CanvasLayer
             Text = "Celestial: 传统3D地形 + 局部体素混合世界 (MVP)\n" +
                    "------------------------------------------\n" +
                    "[WASD] 移动 | [空格] 跳跃 | [鼠标] 视角 (ESC释放)\n" +
-                   "[鼠标左键] 挖掘体素方块 (触底传统地形自动阻隔)\n" +
-                   "[鼠标右键] 放置方块 (当前: 泥土)\n" +
-                   "[数字键 1-5] 切换方块 (1:泥土 2:石头 3:原木 4:木板 5:沙子)"
+                   "[鼠标左键] 挖掘方块 (触底传统地形阻隔) | [鼠标右键] 放置\n" +
+                   "[1-5] 切换方块 | [F3] 调试监控面板 | [F5] 快速存档 | [F9] 快速读档"
         };
         _infoLabel.AddThemeFontSizeOverride("font_size", 15);
         _infoLabel.AddThemeColorOverride("font_color", new Color(0.95f, 0.95f, 0.95f));
@@ -59,9 +58,8 @@ public partial class HUDOverlay : CanvasLayer
             _infoLabel.Text = "Celestial: 传统3D地形 + 局部体素混合世界 (MVP)\n" +
                               "------------------------------------------\n" +
                               "[WASD] 移动 | [空格] 跳跃 | [鼠标] 视角 (ESC释放)\n" +
-                              "[鼠标左键] 挖掘体素方块 (触底传统地形自动阻隔)\n" +
-                              $"[鼠标右键] 放置方块 (当前选中: {_interactor.SelectedBlockType})\n" +
-                              "[数字键 1-5] 切换方块 (1:泥土 2:石头 3:原木 4:木板 5:沙子)";
+                              $"[鼠标左键] 挖掘 | [鼠标右键] 放置 (当前: {_interactor.SelectedBlockType})\n" +
+                              "[1-5] 切换方块 | [F3] 调试监控面板 | [F5] 快速存档 | [F9] 快速读档";
         }
     }
 }

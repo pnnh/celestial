@@ -17,8 +17,46 @@ public static class TestRunner
         TestChunkCoordMapping();
         TestHeightmapSampling();
         TestWorldCoordinateConversion();
+        TestDeltaPersistence();
 
         GD.Print("[TestRunner] 全部核心逻辑单元测试通过！");
+    }
+
+    private static void TestDeltaPersistence()
+    {
+        Celestial.Persistence.WorldSaveData original = new()
+        {
+            Version = 1,
+            Chunks =
+            [
+                new Celestial.Persistence.ChunkDelta
+                {
+                    ChunkX = 0,
+                    ChunkY = 1,
+                    ChunkZ = 2,
+                    Diffs =
+                    [
+                        new Celestial.Persistence.VoxelDeltaEntry(123, (byte)VoxelType.Stone),
+                        new Celestial.Persistence.VoxelDeltaEntry(456, (byte)VoxelType.Air)
+                    ]
+                }
+            ]
+        };
+
+        string json = System.Text.Json.JsonSerializer.Serialize(original);
+        Celestial.Persistence.WorldSaveData? restored = System.Text.Json.JsonSerializer.Deserialize<Celestial.Persistence.WorldSaveData>(json);
+
+        if (restored == null || restored.Chunks.Count != 1 || restored.Chunks[0].Diffs.Count != 2)
+        {
+            throw new InvalidOperationException("Delta 存档反序列化结构损坏！");
+        }
+
+        if (restored.Chunks[0].Diffs[0].Index != 123 || restored.Chunks[0].Diffs[0].Type != (byte)VoxelType.Stone)
+        {
+            throw new InvalidOperationException("Delta 方块条目数据失真！");
+        }
+
+        GD.Print("  ✓ 差异存档序列化与反序列化轻量 JSON 校验通过");
     }
 
     private static void TestChunkCoordMapping()

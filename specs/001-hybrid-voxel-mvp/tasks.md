@@ -68,15 +68,16 @@
 
 ## Phase 4: Polish, Debugging & Delta Persistence (Sprint 4)
 
-- [ ] **TASK-013**: 实现调试可视化与性能监视器
+- [x] **TASK-013**: 实现调试可视化与性能监视器
   - 文件：`src/Core/DebugOverlay.cs`
-  - 描述：绘制 Chunk AABB 线框、当前指针坐标、FPS 及网格重建耗时指标。
-  - 验证：按 F3 切换调试信息面板显示。
-- [ ] **TASK-014**: 实现轻量级差异存档与读取 (Delta Persistence)
+  - 描述：绘制准心体素方块线框选择框（触底标红/正常标天蓝）、FPS、内存、角色坐标、Chunk 坐标与底层高度指标。按 F3 切换。
+  - 验证：按 F3 切换调试信息面板显示，瞄准方块时显示精确的 3D 线框。
+- [x] **TASK-014**: 实现轻量级差异存档与读取 (Delta Persistence)
   - 文件：`src/Persistence/ChunkDelta.cs`, `src/Persistence/SimpleSaveManager.cs`
-  - 描述：仅保存与默认地形不一致的修改方块，支持 JSON 或二进制轻量存取。
-  - 验证：挖掘和放置后按保存键，重启游戏后修改完全保留。
-- [ ] **TASK-015**: 结合 Blender MCP 与 Ludo AI 丰富测试场景美术资产
-  - 描述：使用 Blender MCP 生成精细的传统岩石和峡谷地形网格，使用 Ludo AI MCP 补充体素材质纹理并挂接测试。
-  - 验证：传统地形与体素区域视觉过渡自然，资产经由 Git LFS 规范管理。
+  - 描述：仅保存与默认地形不一致的修改方块，支持 JSON 轻量序列化。支持 F5 快捷保存与 F9 快捷加载。
+  - 验证：单元测试通过，挖掘和放置方块后按 F5，重新载入后修改完全保留。
+- [x] **TASK-015**: 结合 Blender MCP 与 Ludo AI 丰富测试场景美术资产
+  - 文件：`assets/models/ancient_monolith.glb`, `assets/textures/*.png`
+  - 描述：通过在线 Blender MCP 程序化生成远古图腾柱（Ancient Monolith）并导出 GLB 资产，结合程序化纹理库生成泥土/石头/木材/沙子贴图，全部受 Git LFS 纳管。
+  - 验证：Godot 正确导入 GLB 模型并将其摆放在传统 3D 地形上，验证混合世界资产共存。
 

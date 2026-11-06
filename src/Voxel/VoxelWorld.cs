@@ -18,6 +18,7 @@ public partial class VoxelWorld : Node3D
 
     private readonly Dictionary<ChunkCoord, VoxelChunk> _chunks = [];
     private readonly HashSet<ChunkCoord> _dirtyChunks = [];
+    private readonly Dictionary<ChunkCoord, Dictionary<int, VoxelType>> _playerModifications = [];
     private StandardMaterial3D _sharedVoxelMaterial = null!;
 
     public override void _Ready()
@@ -185,9 +186,75 @@ public partial class VoxelWorld : Node3D
         chunk.SetVoxel(local.X, local.Y, local.Z, type);
         _dirtyChunks.Add(coord);
 
+        // 记录差异修改用于存档
+        int localIndex = ChunkCoord.LocalToIndex(local.X, local.Y, local.Z);
+        if (!_playerModifications.TryGetValue(coord, out Dictionary<int, VoxelType>? diffs))
+        {
+            diffs = [];
+            _playerModifications[coord] = diffs;
+        }
+        diffs[localIndex] = type;
+
         // 检查边界并级联标记相邻 Chunk 为 Dirty
         MarkBorderNeighborsDirty(coord, local);
         return true;
+    }
+
+    /// <summary>
+    /// 导出当前世界的玩家修改差异数据
+    /// </summary>
+    public Celestial.Persistence.WorldSaveData ExportDeltaSaveData()
+    {
+        Celestial.Persistence.WorldSaveData data = new();
+        foreach (KeyValuePair<ChunkCoord, Dictionary<int, VoxelType>> kv in _playerModifications)
+        {
+            if (kv.Value.Count == 0) continue;
+            Celestial.Persistence.ChunkDelta cd = new()
+            {
+                ChunkX = kv.Key.X,
+                ChunkY = kv.Key.Y,
+                ChunkZ = kv.Key.Z
+            };
+            foreach (KeyValuePair<int, VoxelType> d in kv.Value)
+            {
+                cd.Diffs.Add(new Celestial.Persistence.VoxelDeltaEntry(d.Key, (byte)d.Value));
+            }
+            data.Chunks.Add(cd);
+        }
+        return data;
+    }
+
+    /// <summary>
+    /// 导入并应用玩家修改差异数据，还原世界修改状态
+    /// </summary>
+    public void ImportDeltaSaveData(Celestial.Persistence.WorldSaveData data)
+    {
+        foreach (Celestial.Persistence.ChunkDelta chunkDelta in data.Chunks)
+        {
+            ChunkCoord coord = new(chunkDelta.ChunkX, chunkDelta.ChunkY, chunkDelta.ChunkZ);
+            if (!_chunks.TryGetValue(coord, out VoxelChunk? chunk))
+            {
+                chunk = CreateChunkNode(coord);
+            }
+
+            if (!_playerModifications.TryGetValue(coord, out Dictionary<int, VoxelType>? diffs))
+            {
+                diffs = [];
+                _playerModifications[coord] = diffs;
+            }
+
+            foreach (Celestial.Persistence.VoxelDeltaEntry entry in chunkDelta.Diffs)
+            {
+                Vector3I local = ChunkCoord.IndexToLocal(entry.Index);
+                VoxelType type = (VoxelType)entry.Type;
+                chunk.SetVoxel(local.X, local.Y, local.Z, type);
+                diffs[entry.Index] = type;
+            }
+
+            _dirtyChunks.Add(coord);
+        }
+
+        UpdateDirtyChunks();
     }
 
     private void MarkBorderNeighborsDirty(ChunkCoord coord, Vector3I local)
