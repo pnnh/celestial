@@ -1,0 +1,110 @@
+.specify/feature.json
+  h_6465a203f88bd5 1
+docs/plan/open_world_terrain_and_streaming_architecture.md
+  h_6465a203f88bd5 1-129
+scenes/main.tscn
+  h_6465a203f88bd5 1,4-12,41-53,56,59-67,69-70,73,76,79
+shaders/ocean_water.gdshader
+  h_6465a203f88bd5 1-46
+shaders/ocean_water.gdshader.uid
+  h_6465a203f88bd5 1
+shaders/terrain_triplanar.gdshader
+  h_6465a203f88bd5 1-33
+shaders/terrain_triplanar.gdshader.uid
+  h_6465a203f88bd5 1
+specs/003-hybrid-open-world-terrain/contracts/IHeightSampler.md
+  h_6465a203f88bd5 1-53
+specs/003-hybrid-open-world-terrain/contracts/ITiledTerrainManager.md
+  h_6465a203f88bd5 1-55
+specs/003-hybrid-open-world-terrain/contracts/IVoxelVolume.md
+  h_6465a203f88bd5 1-78
+specs/003-hybrid-open-world-terrain/data-model.md
+  h_6465a203f88bd5 1-195
+specs/003-hybrid-open-world-terrain/plan.md
+  h_6465a203f88bd5 1-117
+specs/003-hybrid-open-world-terrain/quickstart.md
+  h_6465a203f88bd5 1-91
+specs/003-hybrid-open-world-terrain/research.md
+  h_6465a203f88bd5 1-132
+specs/003-hybrid-open-world-terrain/spec.md
+  h_6465a203f88bd5 1-127
+specs/003-hybrid-open-world-terrain/tasks.md
+  h_6465a203f88bd5 1-167
+src/Core/DebugOverlay.cs
+  h_6465a203f88bd5 26,89,121,125-127,133
+src/Core/GameManager.cs
+  h_6465a203f88bd5 10-20
+src/Player/BedrockPhysicsDetector.cs
+  h_6465a203f88bd5 1-123
+src/Player/BedrockPhysicsDetector.cs.uid
+  h_6465a203f88bd5 1
+src/Player/InteractionRaycastResult.cs
+  h_6465a203f88bd5 1-37
+src/Player/InteractionRaycastResult.cs.uid
+  h_6465a203f88bd5 1
+src/Player/VoxelInteractor.cs
+  h_6465a203f88bd5 17-18,68,70,85-86,97,102-107,109,111,115-116,121,125,130,133,145-146
+src/Terrain/IHeightSampler.cs
+  h_6465a203f88bd5 7,22,26-41
+src/Terrain/IslandHeightSampler.cs
+  h_6465a203f88bd5 1-146
+src/Terrain/IslandHeightSampler.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/OceanWaterPlane.cs
+  h_6465a203f88bd5 1-71
+src/Terrain/OceanWaterPlane.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/RawTileMeshData.cs
+  h_6465a203f88bd5 1-126
+src/Terrain/RawTileMeshData.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/TerrainTile.cs
+  h_6465a203f88bd5 1-115
+src/Terrain/TerrainTile.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/TerrainTileCoord.cs
+  h_6465a203f88bd5 1-63
+src/Terrain/TerrainTileCoord.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/TiledTerrainManager.cs
+  h_6465a203f88bd5 1-236
+src/Terrain/TiledTerrainManager.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/IVoxelVolume.cs
+  h_6465a203f88bd5 1-52
+src/Voxel/IVoxelVolume.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/VoxelVolume.cs
+  h_6465a203f88bd5 1-251
+src/Voxel/VoxelVolume.cs.uid
+  h_6465a203f88bd5 1
+src/Voxel/VoxelWorld.cs
+  h_6465a203f88bd5 14-17,45-48,62,165,297
+tests/test_bedrock_interaction.gd
+  h_6465a203f88bd5 1-74
+tests/test_bedrock_interaction.gd.uid
+  h_6465a203f88bd5 1
+tests/test_island_height_sampler.gd
+  h_6465a203f88bd5 1-85
+tests/test_island_height_sampler.gd.uid
+  h_6465a203f88bd5 1
+tests/test_tiled_terrain_streaming.gd
+  h_6465a203f88bd5 1-59
+tests/test_tiled_terrain_streaming.gd.uid
+  h_6465a203f88bd5 1
+tests/test_voxel_volume_meshing.gd
+  h_6465a203f88bd5 1-60
+tests/test_voxel_volume_meshing.gd.uid
+  h_6465a203f88bd5 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be5e1dcaa42ec28b7a981638ae33c2b905d22489",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
