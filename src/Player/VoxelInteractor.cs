@@ -14,6 +14,8 @@ public partial class VoxelInteractor : Node3D
 
     public VoxelType SelectedBlockType { get; private set; } = VoxelType.Dirt;
 
+    private readonly BedrockPhysicsDetector _detector = new();
+
     public override void _Ready()
     {
         if (World == null)
@@ -63,11 +65,9 @@ public partial class VoxelInteractor : Node3D
         }
     }
 
-    private bool CastInteractionRay(out Vector3 hitPos, out Vector3 hitNormal)
+    private bool CastInteractionRay(out InteractionRaycastResult hitResult)
     {
-        hitPos = Vector3.Zero;
-        hitNormal = Vector3.Zero;
-
+        hitResult = InteractionRaycastResult.Empty;
         if (Player?.Camera == null)
         {
             return false;
@@ -82,9 +82,8 @@ public partial class VoxelInteractor : Node3D
 
         if (result.Count > 0)
         {
-            hitPos = (Vector3)result["position"];
-            hitNormal = (Vector3)result["normal"];
-            return true;
+            hitResult = _detector.AnalyzeHit(result, World?.CurrentSampler);
+            return hitResult.Type != HitType.None;
         }
 
         return false;
@@ -95,46 +94,43 @@ public partial class VoxelInteractor : Node3D
     /// </summary>
     public void PerformDig()
     {
-        if (World == null || !CastInteractionRay(out Vector3 hitPos, out Vector3 hitNormal))
+        if (World == null || !CastInteractionRay(out var hit))
         {
             return;
         }
 
-        // 挖掘目标坐标：沿法线向内步进 0.5 格
-        Vector3 targetPoint = hitPos - hitNormal * 0.4f;
-        int vx = Mathf.FloorToInt(targetPoint.X);
-        int vy = Mathf.FloorToInt(targetPoint.Y);
-        int vz = Mathf.FloorToInt(targetPoint.Z);
-
-        // 检查触底阻隔（基岩 / 传统 3D 地形）
-        if (!World.CanDig(vx, vy, vz))
+        // 检查触底阻隔（基岩 / 传统 3D 实体）
+        if (hit.Type == HitType.Bedrock)
         {
-            GD.Print($"[挖掘阻隔] 坐标 ({vx}, {vy}, {vz}) 触底传统地形，属于不可破坏基岩！");
+            GD.Print($"[基岩阻隔] 命中 3D 静态实体或触底大地形 ({hit.TargetVoxelCoord})，属于不可破坏基岩！");
             return;
         }
 
-        World.SetVoxel(vx, vy, vz, VoxelType.Air);
-        GD.Print($"[挖掘成功] 移除方块 ({vx}, {vy}, {vz})");
+        if (!World.CanDig(hit.TargetVoxelCoord.X, hit.TargetVoxelCoord.Y, hit.TargetVoxelCoord.Z))
+        {
+            GD.Print($"[挖掘阻隔] 坐标 {hit.TargetVoxelCoord} 不可挖掘！");
+            return;
+        }
+
+        World.SetVoxel(hit.TargetVoxelCoord.X, hit.TargetVoxelCoord.Y, hit.TargetVoxelCoord.Z, VoxelType.Air);
+        GD.Print($"[挖掘成功] 移除方块 {hit.TargetVoxelCoord}");
     }
 
     /// <summary>
     /// 放置操作：沿射线命中法线向外放置，并避免与角色自身胶囊体产生重叠卡人
+    /// 支持在传统 3D 实体或地形表面法线外侧吸附搭建
     /// </summary>
     public void PerformPlace()
     {
-        if (World == null || Player == null || !CastInteractionRay(out Vector3 hitPos, out Vector3 hitNormal))
+        if (World == null || Player == null || !CastInteractionRay(out var hit))
         {
             return;
         }
 
-        // 放置目标坐标：沿法线向外步进 0.5 格
-        Vector3 targetPoint = hitPos + hitNormal * 0.4f;
-        int vx = Mathf.FloorToInt(targetPoint.X);
-        int vy = Mathf.FloorToInt(targetPoint.Y);
-        int vz = Mathf.FloorToInt(targetPoint.Z);
+        Vector3I placeCoord = hit.PlaceVoxelCoord;
 
         // 检查是否与玩家当前位置/胶囊体发生碰撞重叠（防止卡人）
-        Aabb blockAabb = new(new Vector3(vx, vy, vz), Vector3.One);
+        Aabb blockAabb = new(new Vector3(placeCoord.X, placeCoord.Y, placeCoord.Z), Vector3.One);
         Aabb playerAabb = new(
             Player.GlobalPosition - new Vector3(0.4f, 0.0f, 0.4f),
             new Vector3(0.8f, 1.8f, 0.8f)
@@ -146,7 +142,7 @@ public partial class VoxelInteractor : Node3D
             return;
         }
 
-        World.SetVoxel(vx, vy, vz, SelectedBlockType);
-        GD.Print($"[放置成功] 在 ({vx}, {vy}, {vz}) 放置 {SelectedBlockType}");
+        World.SetVoxel(placeCoord.X, placeCoord.Y, placeCoord.Z, SelectedBlockType);
+        GD.Print($"[放置成功] 在 {placeCoord} (命中类型: {hit.Type}) 附着放置 {SelectedBlockType}");
     }
 }

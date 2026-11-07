@@ -23,6 +23,7 @@ public partial class DebugOverlay : CanvasLayer
     private PlayerController? _player;
     private VoxelInteractor? _interactor;
     private VoxelWorld? _world;
+    private Terrain.TiledTerrainManager? _terrainManager;
 
     public override void _Ready()
     {
@@ -85,6 +86,7 @@ public partial class DebugOverlay : CanvasLayer
         _player = GetTree().Root.FindChild("Player", true, false) as PlayerController;
         _interactor = GetTree().Root.FindChild("VoxelInteractor", true, false) as VoxelInteractor;
         _world = GetTree().Root.FindChild("VoxelWorld", true, false) as VoxelWorld;
+        _terrainManager = GetTree().Root.FindChild("TiledTerrainManager", true, false) as Terrain.TiledTerrainManager;
     }
 
     public override void _UnhandledInput(InputEvent @event)
@@ -116,15 +118,19 @@ public partial class DebugOverlay : CanvasLayer
         string targetBlockInfo = "无目标";
         if (GetAimVoxel(out int vx, out int vy, out int vz, out bool isBedrock, out VoxelType blockType))
         {
-            float terrainH = _world?.TraditionalTerrain?.HeightSampler?.GetHeight(vx + 0.5f, vz + 0.5f) ?? 0.0f;
+            float terrainH = _world?.CurrentSampler?.GetHeight(vx + 0.5f, vz + 0.5f) ?? 0.0f;
             targetBlockInfo = $"({vx}, {vy}, {vz}) [{blockType}]\n  底模高度: {terrainH:F2}m (基岩阻隔: {(isBedrock ? "是" : "否")})";
         }
+
+        int activeTiles = _terrainManager?.ActiveTileCount ?? 0;
+        int pendingJobs = _terrainManager?.PendingJobCount ?? 0;
 
         _debugLabel.Text =
             $"=== Celestial Debug Monitor [F3] ===\n" +
             $"FPS: {fps:F0} | 帧耗时: {processTime:F2} ms\n" +
             $"静态内存: {staticMem:F2} MB\n" +
             $"------------------------------------\n" +
+            $"大地形瓦片: 活动 {activeTiles} 块 | 异步任务: {pendingJobs}\n" +
             $"角色坐标: ({pPos.X:F2}, {pPos.Y:F2}, {pPos.Z:F2})\n" +
             $"角色Chunk: {pChunk}\n" +
             $"地面状态: {(_player?.IsOnFloor() == true ? "着地 (OnFloor)" : "空中 (Air)")}\n" +

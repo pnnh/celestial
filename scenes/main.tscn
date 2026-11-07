@@ -1,13 +1,15 @@
-[gd_scene load_steps=11 format=3 uid="uid://c6j2k1m8y0p3q"]
+[gd_scene load_steps=13 format=3 uid="uid://c6j2k1m8y0p3q"]
 
 [ext_resource type="Script" path="res://src/Core/GameManager.cs" id="1_main"]
-[ext_resource type="Script" path="res://src/Terrain/StaticTerrain.cs" id="2_terrain"]
-[ext_resource type="Script" path="res://src/Voxel/VoxelWorld.cs" id="3_world"]
-[ext_resource type="PackedScene" path="res://scenes/prefabs/player.tscn" id="4_player"]
-[ext_resource type="Script" path="res://src/Core/HUDOverlay.cs" id="5_hud"]
-[ext_resource type="Script" path="res://src/Core/DebugOverlay.cs" id="6_debug"]
-[ext_resource type="Script" path="res://src/Persistence/SimpleSaveManager.cs" id="7_save"]
-[ext_resource type="PackedScene" path="res://assets/models/ancient_monolith.glb" id="8_monolith"]
+[ext_resource type="Script" path="res://src/Terrain/TiledTerrainManager.cs" id="2_tiled_terrain"]
+[ext_resource type="Script" path="res://src/Terrain/OceanWaterPlane.cs" id="3_ocean"]
+[ext_resource type="Script" path="res://src/Voxel/VoxelWorld.cs" id="4_world"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/player.tscn" id="5_player"]
+[ext_resource type="Script" path="res://src/Core/HUDOverlay.cs" id="6_hud"]
+[ext_resource type="Script" path="res://src/Core/DebugOverlay.cs" id="7_debug"]
+[ext_resource type="Script" path="res://src/Persistence/SimpleSaveManager.cs" id="8_save"]
+[ext_resource type="PackedScene" path="res://assets/models/ancient_monolith.glb" id="9_monolith"]
+[ext_resource type="Script" path="res://src/Voxel/VoxelVolume.cs" id="10_volume"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.38, 0.65, 0.95, 1)
@@ -36,34 +38,43 @@ shadow_enabled = true
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_env")
 
-[node name="StaticTerrain" type="Node3D" parent="."]
-script = ExtResource("2_terrain")
-BaseHeight = 4.0
-ValleyDepth = 3.5
-ValleyRadius = 20.0
-TerrainExtent = 40
-GridStep = 1.0
+[node name="OceanWaterPlane" type="MeshInstance3D" parent="."]
+script = ExtResource("3_ocean")
+SeaLevel = 0.0
+PlaneSize = 2048.0
 
-[node name="VoxelWorld" type="Node3D" parent="." node_paths=PackedStringArray("TraditionalTerrain")]
-script = ExtResource("3_world")
-TraditionalTerrain = NodePath("../StaticTerrain")
+[node name="TiledTerrainManager" type="Node3D" parent="."]
+script = ExtResource("2_tiled_terrain")
+TileSize = 64.0
+ViewDistanceTiles = 5
+
+[node name="VoxelWorld" type="Node3D" parent="." node_paths=PackedStringArray("TiledTerrain")]
+script = ExtResource("4_world")
+TiledTerrain = NodePath("../TiledTerrainManager")
 RegionChunkRadiusX = 1
 RegionChunkRadiusZ = 1
-RegionChunkHeight = 1
+RegionChunkHeight = 2
 VoxelLayerThickness = 4
 
-[node name="AncientMonolith" parent="." instance=ExtResource("8_monolith")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 12, 5.8, -12)
+[node name="QuarryVolume" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 14, 0)
+script = ExtResource("10_volume")
+VolumeId = "quarry_plain_01"
+Extents = Vector3(32, 16, 32)
+LayerThickness = 4
 
-[node name="Player" parent="." instance=ExtResource("4_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 12)
+[node name="AncientMonolith" parent="." instance=ExtResource("9_monolith")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 12, 16.0, -12)
+
+[node name="Player" parent="." instance=ExtResource("5_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, 0)
 
 [node name="HUDOverlay" type="CanvasLayer" parent="."]
-script = ExtResource("5_hud")
+script = ExtResource("6_hud")
 
 [node name="DebugOverlay" type="CanvasLayer" parent="."]
-script = ExtResource("6_debug")
+script = ExtResource("7_debug")
 
 [node name="SaveManager" type="Node" parent="." node_paths=PackedStringArray("World")]
-script = ExtResource("7_save")
+script = ExtResource("8_save")
 World = NodePath("../VoxelWorld")

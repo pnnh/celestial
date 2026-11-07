@@ -11,6 +11,10 @@ namespace Celestial.Voxel;
 public partial class VoxelWorld : Node3D
 {
     [Export] public StaticTerrain? TraditionalTerrain;
+    [Export] public TiledTerrainManager? TiledTerrain;
+    public IHeightSampler? CurrentSampler =>
+        TiledTerrain?.HeightSampler ?? TraditionalTerrain?.HeightSampler;
+
     [Export] public int RegionChunkRadiusX = 1; // 范围 [-1, 1] 轴向 Chunk 数量
     [Export] public int RegionChunkRadiusZ = 1; // 范围 [-1, 1] 轴向 Chunk 数量
     [Export] public int RegionChunkHeight = 1;  // 高度方向 Chunk 数量 (0 ~ 1)
@@ -38,6 +42,10 @@ public partial class VoxelWorld : Node3D
             Metallic = 0.05f
         };
 
+        if (TiledTerrain == null)
+        {
+            TiledTerrain = GetNodeOrNull<TiledTerrainManager>("../TiledTerrainManager");
+        }
         if (TraditionalTerrain == null)
         {
             TraditionalTerrain = GetNodeOrNull<StaticTerrain>("../StaticTerrain");
@@ -51,7 +59,7 @@ public partial class VoxelWorld : Node3D
     /// </summary>
     public void InitializeVoxelRegion()
     {
-        IHeightSampler? sampler = TraditionalTerrain?.HeightSampler;
+        IHeightSampler? sampler = CurrentSampler;
 
         for (int cx = -RegionChunkRadiusX; cx <= RegionChunkRadiusX; cx++)
         {
@@ -154,7 +162,7 @@ public partial class VoxelWorld : Node3D
         }
 
         // 如果该体素紧贴或已经达到传统地形表面高度，判定为触底不可挖掘
-        if (TraditionalTerrain?.HeightSampler is { } sampler)
+        if (CurrentSampler is { } sampler)
         {
             float terrainH = sampler.GetHeight(wx + 0.5f, wz + 0.5f);
             if (wy <= Mathf.FloorToInt(terrainH))
@@ -286,7 +294,7 @@ public partial class VoxelWorld : Node3D
             return;
         }
 
-        IHeightSampler? sampler = TraditionalTerrain?.HeightSampler;
+        IHeightSampler? sampler = CurrentSampler;
         foreach (ChunkCoord coord in _dirtyChunks)
         {
             if (_chunks.TryGetValue(coord, out VoxelChunk? chunk))
