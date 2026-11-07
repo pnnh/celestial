@@ -1,0 +1,20 @@
+specs/002-player-character-and-camera/tasks.md
+  h_6465a203f88bd5 90-104
+src/Player/CharacterAnimationController.cs
+  h_6465a203f88bd5 92-118
+src/Player/ToolAttachmentManager.cs
+  h_6465a203f88bd5 1,8,20,22,69,79,103,110-112,115,134,139,151-152,163-164,189,198,206,218-219,221-241,243-244,246,248,252,254-264,266,278,289-290,295-298,303,308-310,317-465
+src/Voxel/VoxelWorld.cs
+  h_6465a203f88bd5 101-102,141,260-268,271-276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dce23eaa90bb17b9e57b051e5f0f35a9aefce627",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
