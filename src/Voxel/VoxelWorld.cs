@@ -98,8 +98,8 @@ public partial class VoxelWorld : Node3D
 
                     if (wy < baseTerrainY)
                     {
-                        // 低于传统 3D 地形表面：由底层传统地形负责渲染与碰撞，此处无需生成方块
-                        chunk.SetVoxel(lx, ly, lz, VoxelType.Air);
+                        // 低于传统 3D 地形表面：作为坚固基岩层实心填充，杜绝地下镂空与挖掘后透视穿帮
+                        chunk.SetVoxel(lx, ly, lz, VoxelType.Bedrock);
                     }
                     else if (wy >= baseTerrainY && wy < baseTerrainY + VoxelLayerThickness)
                     {
@@ -138,15 +138,7 @@ public partial class VoxelWorld : Node3D
             return chunk.GetVoxel(local.X, local.Y, local.Z);
         }
 
-        // 超出体素生成区域：若处于传统地形表面以下，则视同不可破坏的基岩
-        if (TraditionalTerrain?.HeightSampler is { } sampler)
-        {
-            if (sampler.IsBelowSurface(wx + 0.5f, wy + 0.5f, wz + 0.5f))
-            {
-                return VoxelType.Bedrock;
-            }
-        }
-
+        // 超出体素生成区域：外部无实体方块，视为空气，确保边界方块朝外表面完整生成
         return VoxelType.Air;
     }
 
@@ -265,14 +257,23 @@ public partial class VoxelWorld : Node3D
         UpdateDirtyChunks();
     }
 
+    public void MarkChunkDirty(ChunkCoord targetCoord)
+    {
+        if (_chunks.TryGetValue(targetCoord, out VoxelChunk? chunk))
+        {
+            chunk.IsDirty = true;
+            _dirtyChunks.Add(targetCoord);
+        }
+    }
+
     private void MarkBorderNeighborsDirty(ChunkCoord coord, Vector3I local)
     {
-        if (local.X == 0) _dirtyChunks.Add(new ChunkCoord(coord.X - 1, coord.Y, coord.Z));
-        if (local.X == Constants.ChunkSize - 1) _dirtyChunks.Add(new ChunkCoord(coord.X + 1, coord.Y, coord.Z));
-        if (local.Y == 0) _dirtyChunks.Add(new ChunkCoord(coord.X, coord.Y - 1, coord.Z));
-        if (local.Y == Constants.ChunkSize - 1) _dirtyChunks.Add(new ChunkCoord(coord.X, coord.Y + 1, coord.Z));
-        if (local.Z == 0) _dirtyChunks.Add(new ChunkCoord(coord.X, coord.Y, coord.Z - 1));
-        if (local.Z == Constants.ChunkSize - 1) _dirtyChunks.Add(new ChunkCoord(coord.X, coord.Y, coord.Z + 1));
+        if (local.X == 0) MarkChunkDirty(new ChunkCoord(coord.X - 1, coord.Y, coord.Z));
+        if (local.X == Constants.ChunkSize - 1) MarkChunkDirty(new ChunkCoord(coord.X + 1, coord.Y, coord.Z));
+        if (local.Y == 0) MarkChunkDirty(new ChunkCoord(coord.X, coord.Y - 1, coord.Z));
+        if (local.Y == Constants.ChunkSize - 1) MarkChunkDirty(new ChunkCoord(coord.X, coord.Y + 1, coord.Z));
+        if (local.Z == 0) MarkChunkDirty(new ChunkCoord(coord.X, coord.Y, coord.Z - 1));
+        if (local.Z == Constants.ChunkSize - 1) MarkChunkDirty(new ChunkCoord(coord.X, coord.Y, coord.Z + 1));
     }
 
     /// <summary>

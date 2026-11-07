@@ -76,11 +76,6 @@ public partial class VoxelChunk : Node3D
     /// </summary>
     public void RebuildMesh(VoxelWorld world, IHeightSampler? terrainSampler = null)
     {
-        if (!IsDirty)
-        {
-            return;
-        }
-
         ArrayMesh? mesh = ChunkMesher.BuildMesh(this, world, terrainSampler);
 
         if (mesh != null)

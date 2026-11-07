@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using Celestial.Voxel;
 using Godot;
 
 namespace Celestial.Player;
 
 /// <summary>
-/// 管理角色手部道具挂接（支持第一人称独立手臂与第三人称骨骼挂接）
+/// 管理角色手部道具挂接（支持第一人称独立写实贴合手臂与第三人称骨骼挂接）
 /// </summary>
 public partial class ToolAttachmentManager : Node
 {
@@ -16,8 +17,9 @@ public partial class ToolAttachmentManager : Node
     private Node3D? _thirdPersonProp;
     private Node3D? _firstPersonProp;
     private Node3D? _firstPersonArm;
+    private Node3D? _firstPersonMount;
     private float _swingTimer = 0.0f;
-    private Vector3 _firstPersonBasePos = new(0.28f, -0.22f, -0.44f);
+    private Vector3 _firstPersonBasePos = new(0.24f, -0.21f, -0.40f);
 
     public override void _Ready()
     {
@@ -64,7 +66,7 @@ public partial class ToolAttachmentManager : Node
                 camera.AddChild(FirstPersonHand);
             }
 
-            // 构建/重构第一人称专属连续统一手臂模型（一体化圆润小臂 + 深色腕带 + 自然手掌）
+            // 构建第一人称专属流畅手臂模型（一体化圆润小臂 + 护腕 + 自然内扣手掌 + 道具锚点）
             Node? oldArm = FirstPersonHand.GetNodeOrNull("FirstPersonArm");
             if (oldArm != null)
             {
@@ -74,6 +76,7 @@ public partial class ToolAttachmentManager : Node
 
             _firstPersonArm = BuildFirstPersonArm();
             FirstPersonHand.AddChild(_firstPersonArm);
+            _firstPersonMount = _firstPersonArm.FindChild("FP_ItemMount", true, false) as Node3D;
         }
     }
 
@@ -97,18 +100,19 @@ public partial class ToolAttachmentManager : Node
             _firstPersonProp = null;
         }
 
-        // 生成第三人称道具 (大小适中，握于掌心 bone_17，与髋部和衣角保持安全间距)
+        // 生成第三人称道具 (大小适中 0.14m，握于掌心 bone_17，与髋部和衣角保持安全间距)
         if (RightHandAttachment != null)
         {
             _thirdPersonProp = CreateProp(selectedType, false);
             RightHandAttachment.AddChild(_thirdPersonProp);
         }
 
-        // 生成第一人称手持物 (置于第一人称手臂的手掌前方)
-        if (FirstPersonHand != null)
+        // 生成第一人称手持物 (精准挂载至手掌道具锚点，手心向内自然托举，绝不穿透小臂)
+        Node3D mountTarget = _firstPersonMount ?? FirstPersonHand!;
+        if (mountTarget != null)
         {
             _firstPersonProp = CreateProp(selectedType, true);
-            FirstPersonHand.AddChild(_firstPersonProp);
+            mountTarget.AddChild(_firstPersonProp);
         }
     }
 
@@ -127,12 +131,12 @@ public partial class ToolAttachmentManager : Node
             float swingOffset = Mathf.Sin(progress * Mathf.Pi);
 
             FirstPersonHand.Position = _firstPersonBasePos + new Vector3(-0.06f * swingOffset, -0.08f * swingOffset, -0.1f * swingOffset);
-            FirstPersonHand.RotationDegrees = new Vector3(10 - 35 * swingOffset, -15 + 20 * swingOffset, -25 * swingOffset);
+            FirstPersonHand.RotationDegrees = new Vector3(8 - 35 * swingOffset, -14 + 20 * swingOffset, -25 * swingOffset);
         }
         else if (FirstPersonHand != null)
         {
             FirstPersonHand.Position = _firstPersonBasePos;
-            FirstPersonHand.RotationDegrees = new Vector3(10, -15, 0);
+            FirstPersonHand.RotationDegrees = new Vector3(8, -14, 0);
         }
     }
 
@@ -144,8 +148,8 @@ public partial class ToolAttachmentManager : Node
         Node3D rig = new()
         {
             Name = "ArmRig",
-            Position = new Vector3(0.02f, -0.06f, 0.14f),
-            RotationDegrees = new Vector3(-66f, 20f, -12f)
+            Position = new Vector3(0.04f, -0.06f, 0.16f),
+            RotationDegrees = new Vector3(-62f, 22f, -14f)
         };
         armRoot.AddChild(rig);
 
@@ -156,8 +160,8 @@ public partial class ToolAttachmentManager : Node
             Mesh = new CylinderMesh
             {
                 TopRadius = 0.048f,
-                BottomRadius = 0.053f,
-                Height = 0.11f,
+                BottomRadius = 0.054f,
+                Height = 0.13f,
                 RadialSegments = 16
             },
             MaterialOverride = new StandardMaterial3D
@@ -182,7 +186,7 @@ public partial class ToolAttachmentManager : Node
             Mesh = new CylinderMesh
             {
                 TopRadius = 0.038f,
-                BottomRadius = 0.045f,
+                BottomRadius = 0.046f,
                 Height = 0.22f,
                 RadialSegments = 16
             },
@@ -191,7 +195,7 @@ public partial class ToolAttachmentManager : Node
         };
         rig.AddChild(forearm);
 
-        // 3. 纤细深黑皮革腕带（避免任何与泥土方块相似的浅褐色矩形块感）
+        // 3. 纤细深黑皮革腕带
         MeshInstance3D wrist = new()
         {
             Name = "WristBand",
@@ -199,7 +203,7 @@ public partial class ToolAttachmentManager : Node
             {
                 TopRadius = 0.040f,
                 BottomRadius = 0.041f,
-                Height = 0.028f,
+                Height = 0.032f,
                 RadialSegments = 16
             },
             MaterialOverride = new StandardMaterial3D
@@ -211,26 +215,55 @@ public partial class ToolAttachmentManager : Node
         };
         rig.AddChild(wrist);
 
-        // 4. 自然手掌（托举平面）
-        MeshInstance3D hand = new()
+        // 4. 手掌关节组（带有手腕内旋角度，掌心朝向身体左前方）
+        Node3D handRig = new()
         {
-            Name = "Hand",
-            Mesh = new BoxMesh { Size = new Vector3(0.066f, 0.048f, 0.072f) },
-            MaterialOverride = skinMat,
-            Position = new Vector3(0.0f, 0.198f, 0.0f)
+            Name = "HandRig",
+            Position = new Vector3(0.0f, 0.172f, 0.0f),
+            RotationDegrees = new Vector3(12f, -6f, 34f) // 手腕内扣翻掌，手心朝向屏幕内侧
         };
-        rig.AddChild(hand);
+        rig.AddChild(handRig);
 
-        // 5. 拇指侧弯支撑
+        // 手掌掌心
+        MeshInstance3D palm = new()
+        {
+            Name = "Palm",
+            Mesh = new BoxMesh { Size = new Vector3(0.066f, 0.046f, 0.060f) },
+            MaterialOverride = skinMat,
+            Position = new Vector3(0.0f, 0.024f, 0.0f)
+        };
+        handRig.AddChild(palm);
+
+        // 自然微弯托底的四指（在方块底部形成写实托衬）
+        MeshInstance3D fingers = new()
+        {
+            Name = "Fingers",
+            Mesh = new BoxMesh { Size = new Vector3(0.060f, 0.026f, 0.040f) },
+            MaterialOverride = skinMat,
+            Position = new Vector3(-0.008f, 0.052f, -0.016f),
+            RotationDegrees = new Vector3(-14f, 0f, 8f)
+        };
+        handRig.AddChild(fingers);
+
+        // 侧后方大拇指支撑
         MeshInstance3D thumb = new()
         {
             Name = "Thumb",
-            Mesh = new BoxMesh { Size = new Vector3(0.022f, 0.030f, 0.048f) },
+            Mesh = new BoxMesh { Size = new Vector3(0.024f, 0.032f, 0.044f) },
             MaterialOverride = skinMat,
-            Position = new Vector3(-0.030f, 0.202f, -0.012f),
-            RotationDegrees = new Vector3(0f, -20f, 15f)
+            Position = new Vector3(0.032f, 0.035f, 0.012f),
+            RotationDegrees = new Vector3(6f, -22f, -18f)
         };
-        rig.AddChild(thumb);
+        handRig.AddChild(thumb);
+
+        // 第一人称道具挂载锚点（精准置于掌心与指尖内前侧，确保方块完美贴合掌面）
+        Node3D itemMount = new()
+        {
+            Name = "FP_ItemMount",
+            Position = new Vector3(-0.040f, 0.082f, -0.045f),
+            RotationDegrees = new Vector3(14f, 32f, -8f) // 经典等轴测展示角
+        };
+        handRig.AddChild(itemMount);
 
         return armRoot;
     }
@@ -242,7 +275,7 @@ public partial class ToolAttachmentManager : Node
         if (type == VoxelType.Air)
         {
             // 水晶双刃镐
-            float scale = isFirstPerson ? 0.78f : 0.62f;
+            float scale = isFirstPerson ? 0.72f : 0.60f;
             root.AddChild(BuildPickaxeMesh(scale));
 
             if (!isFirstPerson)
@@ -253,41 +286,181 @@ public partial class ToolAttachmentManager : Node
             }
             else
             {
-                root.RotationDegrees = new Vector3(0, 75, -20);
-                root.Position = new Vector3(0.01f, 0.035f, -0.05f);
+                root.RotationDegrees = new Vector3(-10, 65, -15);
+                root.Position = new Vector3(0.01f, -0.02f, 0.01f);
             }
         }
         else
         {
-            // 紧凑迷你方块 (掌心微缩体素模型，唯一定位在第一人称手掌中心)
-            float blockSize = isFirstPerson ? 0.115f : 0.11f;
-            BoxMesh mesh = new() { Size = new Vector3(blockSize, blockSize, blockSize) };
-            StandardMaterial3D mat = new()
-            {
-                AlbedoColor = type.GetDebugColor(),
-                Roughness = 0.65f
-            };
-            MeshInstance3D block = new()
-            {
-                Mesh = mesh,
-                MaterialOverride = mat
-            };
-            root.AddChild(block);
+            // 方块手持道具（第一人称 0.20m，贴合掌心且降低与 1m 方块视觉落差；第三人称 0.14m 避免碰撞衣摆）
+            float blockSize = isFirstPerson ? 0.20f : 0.14f;
+            MeshInstance3D blockMeshInst = CreateVoxelBlockMesh(type, blockSize);
+            root.AddChild(blockMeshInst);
 
             if (!isFirstPerson)
             {
                 // 第三人称掌心托举位置 (置于手掌心 bone_17 正前方，绝不与小臂或腰部相切穿模)
-                root.Position = new Vector3(-0.015f, -0.015f, 0.035f);
+                root.Position = new Vector3(-0.015f, -0.015f, 0.038f);
                 root.RotationDegrees = new Vector3(15, -10, 15);
             }
             else
             {
-                root.Position = new Vector3(0.005f, 0.04f, -0.065f);
-                root.RotationDegrees = new Vector3(12, 26, 8);
+                // 第一人称直接挂在 FP_ItemMount 原点，方块中心向前外微偏，使右下底角紧贴掌心
+                root.Position = new Vector3(0.0f, 0.0f, 0.0f);
+                root.RotationDegrees = new Vector3(0.0f, 0.0f, 0.0f);
             }
         }
 
         return root;
+    }
+
+    /// <summary>
+    /// 为手持方块生成带纹理图集 UV 映射的高质感立方体 Mesh
+    /// </summary>
+    private static MeshInstance3D CreateVoxelBlockMesh(VoxelType type, float size)
+    {
+        StandardMaterial3D? material = null;
+        if (ResourceLoader.Exists("res://assets/textures/voxel_atlas.png"))
+        {
+            Texture2D atlas = ResourceLoader.Load<Texture2D>("res://assets/textures/voxel_atlas.png");
+            material = new StandardMaterial3D
+            {
+                AlbedoTexture = atlas,
+                TextureFilter = BaseMaterial3D.TextureFilterEnum.NearestWithMipmaps,
+                VertexColorUseAsAlbedo = true,
+                Roughness = 0.85f,
+                Metallic = 0.05f
+            };
+        }
+
+        if (material == null)
+        {
+            return new MeshInstance3D
+            {
+                Mesh = new BoxMesh { Size = new Vector3(size, size, size) },
+                MaterialOverride = new StandardMaterial3D
+                {
+                    AlbedoColor = type.GetDebugColor(),
+                    Roughness = 0.65f
+                }
+            };
+        }
+
+        float half = size * 0.5f;
+        Vector3[] baseVerts =
+        [
+            new(-half, -half, -half), // 0
+            new( half, -half, -half), // 1
+            new( half,  half, -half), // 2
+            new(-half,  half, -half), // 3
+            new(-half, -half,  half), // 4
+            new( half, -half,  half), // 5
+            new( half,  half,  half), // 6
+            new(-half,  half,  half)  // 7
+        ];
+
+        int[][] faceIndices =
+        [
+            [1, 5, 6, 2], // +X
+            [4, 0, 3, 7], // -X
+            [3, 2, 6, 7], // +Y
+            [4, 5, 1, 0], // -Y
+            [5, 4, 7, 6], // +Z
+            [0, 1, 2, 3]  // -Z
+        ];
+
+        Vector3[] normals =
+        [
+            Vector3.Right,
+            Vector3.Left,
+            Vector3.Up,
+            Vector3.Down,
+            Vector3.Back,
+            Vector3.Forward
+        ];
+
+        List<Vector3> verts = [];
+        List<Vector3> norms = [];
+        List<Vector2> uvs = [];
+        List<Color> colors = [];
+        List<int> idxs = [];
+
+        const float totalCols = 3.0f;
+        const float totalRows = 2.0f;
+        const float eps = 0.002f;
+
+        for (int face = 0; face < 6; face++)
+        {
+            var (col, row) = GetAtlasTile(type, face);
+            float u0 = (col + eps) / totalCols;
+            float u1 = (col + 1.0f - eps) / totalCols;
+            float v0 = (row + eps) / totalRows;
+            float v1 = (row + 1.0f - eps) / totalRows;
+
+            Vector2[] tileUvs =
+            [
+                new(u0, v1),
+                new(u1, v1),
+                new(u1, v0),
+                new(u0, v0)
+            ];
+
+            // 简易方向光照阴影，增强 3D 立体质感
+            float shade = face switch
+            {
+                2 => 1.0f,  // Top
+                3 => 0.6f,  // Bottom
+                4 or 5 => 0.88f,
+                _ => 0.78f
+            };
+            Color shadeColor = new(shade, shade, shade, 1.0f);
+
+            int start = verts.Count;
+            for (int i = 0; i < 4; i++)
+            {
+                verts.Add(baseVerts[faceIndices[face][i]]);
+                norms.Add(normals[face]);
+                uvs.Add(tileUvs[i]);
+                colors.Add(shadeColor);
+            }
+
+            idxs.Add(start + 0); idxs.Add(start + 1); idxs.Add(start + 2);
+            idxs.Add(start + 0); idxs.Add(start + 2); idxs.Add(start + 3);
+        }
+
+        Godot.Collections.Array arrays = [];
+        arrays.Resize((int)Mesh.ArrayType.Max);
+        arrays[(int)Mesh.ArrayType.Vertex] = verts.ToArray();
+        arrays[(int)Mesh.ArrayType.Normal] = norms.ToArray();
+        arrays[(int)Mesh.ArrayType.TexUV] = uvs.ToArray();
+        arrays[(int)Mesh.ArrayType.Color] = colors.ToArray();
+        arrays[(int)Mesh.ArrayType.Index] = idxs.ToArray();
+
+        ArrayMesh mesh = new();
+        mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+        mesh.SurfaceSetMaterial(0, material);
+
+        return new MeshInstance3D { Mesh = mesh };
+    }
+
+    private static (int col, int row) GetAtlasTile(VoxelType type, int faceIndex)
+    {
+        return type switch
+        {
+            VoxelType.Grass => faceIndex switch
+            {
+                2 => (0, 0), // Top: 草坪
+                3 => (1, 0), // Bottom: 泥土
+                _ => (2, 1)  // Sides: 草边
+            },
+            VoxelType.Dirt => (1, 0),
+            VoxelType.Wood => (2, 0),
+            VoxelType.Stone => (0, 1),
+            VoxelType.Bedrock => (1, 1),
+            VoxelType.Planks => (2, 0),
+            VoxelType.Sand => (1, 0),
+            _ => (0, 0)
+        };
     }
 
     private static Node3D BuildPickaxeMesh(float scale)

@@ -90,6 +90,33 @@ public partial class CharacterAnimationController : Node
                             clonedAnim.TrackSetKeyValue(t, k, new Vector3(0.0f, posVal.Y, 0.0f));
                         }
                     }
+
+                    // 针对待机动画（idle）：稳定骨盆与双腿双脚姿态，消除钟摆式左右晃动与轮流抬脚悬空
+                    if (targetName == "idle" && clonedAnim.TrackGetType(t) == Animation.TrackType.Rotation3D)
+                    {
+                        if (boneName.Equals("Hips", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            // 消除骨盆左右侧倾 Roll 与偏转 Yaw（锁定到水平平衡的标准关键帧 0）
+                            Quaternion q0 = clonedAnim.TrackGetKeyValue(t, 0).AsQuaternion();
+                            int keyCount = clonedAnim.TrackGetKeyCount(t);
+                            for (int k = 0; k < keyCount; k++)
+                            {
+                                clonedAnim.TrackSetKeyValue(t, k, q0);
+                            }
+                        }
+                        else if (boneName.Contains("Leg", System.StringComparison.OrdinalIgnoreCase) ||
+                                 boneName.Contains("Foot", System.StringComparison.OrdinalIgnoreCase) ||
+                                 boneName.Contains("Toes", System.StringComparison.OrdinalIgnoreCase))
+                        {
+                            // 双腿双脚锁定在稳固着地姿态，避免左右轮流脚跟离地，使上身自然呼吸而下身扎实扎根
+                            Quaternion q0 = clonedAnim.TrackGetKeyValue(t, 0).AsQuaternion();
+                            int keyCount = clonedAnim.TrackGetKeyCount(t);
+                            for (int k = 0; k < keyCount; k++)
+                            {
+                                clonedAnim.TrackSetKeyValue(t, k, q0);
+                            }
+                        }
+                    }
                 }
 
                 if (lib.HasAnimation(targetName))
