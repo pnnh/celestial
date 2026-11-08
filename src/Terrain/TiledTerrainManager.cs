@@ -11,6 +11,7 @@ namespace Celestial.Terrain;
 /// 开放世界 64m 瓦片流式调度器与视距 LOD 管理中心
 /// 负责基于观察者坐标异步调度切片网格生成、主线程限流挂载与对象池回收
 /// </summary>
+[Tool]
 public partial class TiledTerrainManager : Node3D
 {
     [Export] public float TileSize { get; set; } = 64.0f;
@@ -19,7 +20,7 @@ public partial class TiledTerrainManager : Node3D
     [Export] public float MaxFrameTimeBudgetMs { get; set; } = 3.0f; // 单帧网格提交上限 3.0ms
 
     public IHeightSampler HeightSampler { get; set; } = null!;
-    public Material? TerrainMaterial { get; private set; }
+    [Export] public Material? TerrainMaterial { get; set; }
 
     public int ActiveTileCount => _activeTiles.Count;
     public int PendingJobCount => _buildingTiles.Count + _readyQueue.Count;
@@ -39,20 +40,61 @@ public partial class TiledTerrainManager : Node3D
         // 1. 若外部未注入采样器，默认创建千米海岛采样器
         HeightSampler ??= new IslandHeightSampler();
 
-        // 2. 加载赛璐璐三平面地表着色材质
+        // 2. 加载赛璐璐三平面地表着色材质并绑定手绘贴图
         var shader = GD.Load<Shader>("res://shaders/terrain_triplanar.gdshader");
         if (shader != null)
         {
-            TerrainMaterial = new ShaderMaterial { Shader = shader };
+            var mat = new ShaderMaterial { Shader = shader };
+
+            var grassTex = GD.Load<Texture2D>("res://assets/textures/ludo/lush_grass_soil.png")
+                           ?? GD.Load<Texture2D>("res://assets/textures/grass_top.png");
+            var rockTex = GD.Load<Texture2D>("res://assets/textures/stone.png");
+            var sandTex = GD.Load<Texture2D>("res://assets/textures/sand.png");
+
+            if (grassTex != null) mat.SetShaderParameter("grass_texture", grassTex);
+            if (rockTex != null) mat.SetShaderParameter("rock_texture", rockTex);
+            if (sandTex != null) mat.SetShaderParameter("sand_texture", sandTex);
+            mat.SetShaderParameter("uv_scale", 0.25f);
+            mat.SetShaderParameter("rock_uv_scale", 0.20f);
+            mat.SetShaderParameter("slope_threshold", 0.65f);
+
+            TerrainMaterial = mat;
         }
 
-        // 3. 预热初始瓦片池
+        // 3. 若处于 Godot 编辑器内，直接生成 3x3 核心地形与碰撞体供预览与地面吸附
+        if (Engine.IsEditorHint())
+        {
+            BuildEditorPreview();
+            return;
+        }
+
+        // 4. 运行时：预热初始瓦片池
         for (int i = 0; i < 32; i++)
         {
             var tile = new TerrainTile();
             tile.Recycle();
             AddChild(tile);
             _tilePool.Enqueue(tile);
+        }
+    }
+
+    private void BuildEditorPreview()
+    {
+        // 编辑器预览全岛地貌：覆盖半径 460m (以原点为中心的完整海岛陆地与浅滩)
+        int maxTileRadius = (int)MathF.Ceiling(460.0f / TileSize);
+        for (int dz = -maxTileRadius; dz <= maxTileRadius; dz++)
+        {
+            for (int dx = -maxTileRadius; dx <= maxTileRadius; dx++)
+            {
+                float dist = MathF.Sqrt(dx * dx + dz * dz) * TileSize;
+                if (dist > 460.0f) continue; // 超出海岸线的外围深海大洋底面在编辑器内无需装载
+
+                var coord = new TerrainTileCoord(dx, dz);
+                // 陆地地表 (<= 360m) 使用 LOD0 (含完整精确物理碰撞体供吸附)，浅滩外缘使用 LOD1
+                var lod = dist <= 360.0f ? LODLevel.LOD0_Near : LODLevel.LOD1_Mid;
+                var meshData = RawTileMeshData.Build(coord, lod, HeightSampler, TileSize);
+                MountTile(meshData);
+            }
         }
     }
 
@@ -63,6 +105,11 @@ public partial class TiledTerrainManager : Node3D
 
     public override void _Process(double delta)
     {
+        if (Engine.IsEditorHint())
+        {
+            return;
+        }
+
         // 1. 主线程限流提交就绪网格 (保证单帧耗时 <= MaxFrameTimeBudgetMs)
         ProcessReadyQueue();
 

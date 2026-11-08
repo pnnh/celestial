@@ -127,3 +127,26 @@ graph TD
    - 物理统一：同一个物理层，角色奔跑起跳脚感完全一致；
    - 材质统一：同源图集与赛璐璐着色器；
    - 边界封闭：地下实心基岩与边界垂直外壁密封，杜绝任何透视穿帮。
+
+---
+
+## 5. 开放世界环境氛围、三平面着色、编辑器吸附与植被生态散布演化 (Feature 004)
+
+### 5.1 晨曦天海一体与大气透视蓝雾 (Atmosphere & Horizon Fog)
+- **天海地平线消除灰色断层**：在 `ProceduralSkyMaterial` 中，将 `ground_horizon_color` 与 `sky_horizon_color` 完全对齐为晨曦天青色（`#ADCDEE`），下半球 `ground_bottom_color` 设为深海纯蓝（`#144794`），彻底消除了水天交界处的默认暗灰过渡带。
+- **大气透视蓝雾**：启用 `fog_enabled = true`，起雾点 `fog_depth_begin = 180.0m`，截止点 `fog_depth_end = 520.0m`。在视距边缘（640m 视野边界之前）形成柔和赛璐璐蓝白空气透视，无缝遮蔽了远处切片网格的方形几何转角与视野硬切断。
+
+### 5.2 世界坐标三平面手绘贴图着色器 (Stylized Triplanar Shader)
+- **彻底消除悬崖贴图拉伸**：升级 `terrain_triplanar.gdshader`，采用绝对世界坐标 `world_pos.zy`、`world_pos.xz`、`world_pos.xy` 分别采样无缝纹理，以四次幂锐化权重混合（`pow(abs(world_normal), 4.0)`），保证 90° 垂直悬崖、缓坡与平原过渡平滑自然。
+- **草甸、沙滩、风化岩壁智能混合**：依据顶点法线坡度 `world_normal.y`（坡度阈值 0.65）混合草皮与岩石，并在海平面沙滩高度区间（$Y \le 2.2\text{m}$）自动过渡为暖黄细沙贴图。
+
+### 5.3 Godot 编辑器内实时地形预览与 3D 资产地面吸附 (`[Tool]` Mode)
+- **`[Tool]` 驱动**：在 `TiledTerrainManager`、`OceanWaterPlane` 与 `FoliageScatter` 标注 `[Tool]` 特性。
+- **轻量 3x3 核心地形与碰撞体**：在编辑器模式下立即生成围绕原点的 9 块核心瓦片及 `StaticBody3D` 碰撞网格，让关卡策划打开场景即可直接看到真实起伏的地表。
+- **一键地面吸附**：开发者可直接从 FileSystem 拖拽任何 3D 模型（如树木、建筑、神庙）至视口，按下快捷键 `Ctrl + Alt + S`（或点击视口工具栏磁铁吸附图标），模型即刻精确吸附贴合在地表斜坡上。
+
+### 5.4 批量程序化植被散布 (Foliage MultiMesh)
+- **单 Draw Call 批量渲染**：基于 `MultiMeshInstance3D` 散布 800+ 株赛璐璐风格卡通树木（六棱柱树干 + 三层圆锥翠绿树冠），GPU 单批次完成绘制，稳定保持 60 FPS。
+- **严格生态规则过滤**：
+  - 标高过滤：$Y < 2.5\text{m}$ 判定为水体与沙滩，生成率为 0%；$Y > 48.0\text{m}$ 判定为极高山巅，不生长植被；
+  - 坡度过滤：法线 $\text{Normal.Y} < 0.80$（陡峭悬崖岩壁）禁止树木生成，保证所有树木只自然扎根在平缓草甸上。

@@ -75,11 +75,12 @@ public partial class BedrockPhysicsDetector : RefCounted
             };
         }
 
-        // 命中体素 Chunk 时，再校验是否低于 3D 大地形表面高度
+        // 命中体素 Chunk 时，再校验是否严格低于 3D 大地形表面高度
+        // 注意：地表及地表以上放置的方块 (digCoord.Y >= floor(terrainH)) 属于玩家自由建造层，必须允许正常挖掘！
         if (sampler != null)
         {
             float terrainH = sampler.GetHeight(digCoord.X + 0.5f, digCoord.Z + 0.5f);
-            if (digCoord.Y <= Mathf.FloorToInt(terrainH))
+            if (digCoord.Y < Mathf.FloorToInt(terrainH))
             {
                 return new InteractionRaycastResult
                 {

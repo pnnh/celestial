@@ -12,8 +12,14 @@ public partial class VoxelWorld : Node3D
 {
     [Export] public StaticTerrain? TraditionalTerrain;
     [Export] public TiledTerrainManager? TiledTerrain;
+    public IHeightSampler? HeightSamplerOverride { get; set; }
     public IHeightSampler? CurrentSampler =>
-        TiledTerrain?.HeightSampler ?? TraditionalTerrain?.HeightSampler;
+        HeightSamplerOverride ?? TiledTerrain?.HeightSampler ?? TraditionalTerrain?.HeightSampler;
+
+    public void SetHeightSampler(IslandHeightSampler sampler)
+    {
+        HeightSamplerOverride = sampler;
+    }
 
     [Export] public int RegionChunkRadiusX = 1; // 范围 [-1, 1] 轴向 Chunk 数量
     [Export] public int RegionChunkRadiusZ = 1; // 范围 [-1, 1] 轴向 Chunk 数量
@@ -161,11 +167,11 @@ public partial class VoxelWorld : Node3D
             return false;
         }
 
-        // 如果该体素紧贴或已经达到传统地形表面高度，判定为触底不可挖掘
+        // 如果该体素严格低于传统地形表面高度，判定为地下基岩不可挖掘
         if (CurrentSampler is { } sampler)
         {
             float terrainH = sampler.GetHeight(wx + 0.5f, wz + 0.5f);
-            if (wy <= Mathf.FloorToInt(terrainH))
+            if (wy < Mathf.FloorToInt(terrainH))
             {
                 return false;
             }

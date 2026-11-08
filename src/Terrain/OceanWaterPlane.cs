@@ -7,6 +7,7 @@ namespace Celestial.Terrain;
 /// 全局海平面与大洋水体渲染节点
 /// 尺寸 2048m x 2048m，锚定于 Y = SeaLevel，水平坐标吸附玩家摄像机平移（营造无垠大洋视感）
 /// </summary>
+[Tool]
 public partial class OceanWaterPlane : MeshInstance3D
 {
     [Export] public float SeaLevel { get; set; } = 0.0f;
@@ -47,6 +48,12 @@ public partial class OceanWaterPlane : MeshInstance3D
 
     public override void _Process(double delta)
     {
+        if (Engine.IsEditorHint())
+        {
+            GlobalPosition = new Vector3(0.0f, SeaLevel, 0.0f);
+            return;
+        }
+
         Vector3 targetPos = Vector3.Zero;
         if (_observer != null && IsInstanceValid(_observer))
         {

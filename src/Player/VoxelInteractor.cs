@@ -142,6 +142,44 @@ public partial class VoxelInteractor : Node3D
             return;
         }
 
+        // 检查放置目标方块所在 1m³ 空间内是否存在 3D 静态实体碰撞体（防止穿模将方块嵌入树干、图腾柱或建筑墙体内部）
+        PhysicsDirectSpaceState3D spaceState = GetWorld3D().DirectSpaceState;
+        BoxShape3D boxShape = new() { Size = new Vector3(0.85f, 0.85f, 0.85f) };
+        PhysicsShapeQueryParameters3D shapeQuery = new()
+        {
+            Shape = boxShape,
+            Transform = new Transform3D(Basis.Identity, new Vector3(placeCoord.X + 0.5f, placeCoord.Y + 0.5f, placeCoord.Z + 0.5f)),
+            CollisionMask = 1, // Layer 1 (Environment/Props)
+            CollideWithBodies = true,
+            CollideWithAreas = false
+        };
+
+        var collisions = spaceState.IntersectShape(shapeQuery, 4);
+        foreach (var col in collisions)
+        {
+            if (col.TryGetValue("collider", out Variant colliderVar) && colliderVar.As<GodotObject>() is CollisionObject3D colObj)
+            {
+                // 排除体素分块与大地形瓦片自身（允许在大地表或体素侧面正常附着放置）
+                bool isTerrainOrVoxel = false;
+                Node? curr = colObj;
+                while (curr != null)
+                {
+                    if (curr is VoxelChunk or Celestial.Terrain.TerrainTile or Celestial.Terrain.StaticTerrain)
+                    {
+                        isTerrainOrVoxel = true;
+                        break;
+                    }
+                    curr = curr.GetParent();
+                }
+
+                if (!isTerrainOrVoxel)
+                {
+                    GD.Print($"[放置受阻] 目标位置 {placeCoord} 存在 3D 实体障碍物 ({colObj.Name})，无法穿模放置！");
+                    return;
+                }
+            }
+        }
+
         World.SetVoxel(placeCoord.X, placeCoord.Y, placeCoord.Z, SelectedBlockType);
         GD.Print($"[放置成功] 在 {placeCoord} (命中类型: {hit.Type}) 附着放置 {SelectedBlockType}");
     }

@@ -38,9 +38,16 @@ void fragment() {
 	}
 
 	vec3 final_color = mix(base_color.rgb, foam_color.rgb, foam * 0.9);
+
+	// 远景地平线与天际线平滑融合 (消除大洋网格方形拐角与硬切边)
+	float cam_dist = length(VERTEX);
+	float horizon_fade = smoothstep(180.0, 480.0, cam_dist);
+	vec3 horizon_color = vec3(0.68, 0.82, 0.95); // 对齐天空盒与大气透视雾色彩
+	final_color = mix(final_color, horizon_color, horizon_fade);
+
 	ALBEDO = final_color;
-	ALPHA = mix(base_color.a, 1.0, foam);
-	ROUGHNESS = 0.2;
-	SPECULAR = 0.5;
+	ALPHA = mix(base_color.a, 1.0, clamp(foam + horizon_fade, 0.0, 1.0));
+	ROUGHNESS = mix(0.2, 1.0, horizon_fade);
+	SPECULAR = mix(0.5, 0.0, horizon_fade);
 }
 
