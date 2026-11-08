@@ -11,10 +11,13 @@ uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
 uniform vec2 wave_speed = vec2(0.04, 0.02);
 uniform float wave_amplitude = 0.12;
 
+varying vec3 v_world_pos;
+
 void vertex() {
 	// 赛璐璐手绘微波轻浮动
 	float wave = sin(VERTEX.x * 0.5 + TIME * 1.5) * cos(VERTEX.z * 0.5 + TIME * 1.2);
 	VERTEX.y += wave * wave_amplitude;
+	v_world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 }
 
 void fragment() {
@@ -40,8 +43,14 @@ void fragment() {
 	vec3 final_color = mix(base_color.rgb, foam_color.rgb, foam * 0.9);
 
 	// 远景地平线与天际线平滑融合 (消除大洋网格方形拐角与硬切边)
+	// 关键：内陆湖泊（海岛中心径向距离 < 260m）坚决不淡出为地平线白雾，保持清澈深蓝！
+	// 只有远离海岛本体的外围大洋边界（280m ~ 460m）且视距较远（> 180m）时才柔和消融进地平线
+	float island_dist = length(v_world_pos.xz);
+	float ocean_radial_fade = smoothstep(280.0, 460.0, island_dist);
 	float cam_dist = length(VERTEX);
-	float horizon_fade = smoothstep(100.0, 260.0, cam_dist);
+	float cam_fade = smoothstep(180.0, 360.0, cam_dist);
+	float horizon_fade = ocean_radial_fade * cam_fade;
+
 	vec3 horizon_color = vec3(0.68, 0.82, 0.95); // 对齐天空盒与大气透视雾色彩
 	final_color = mix(final_color, horizon_color, horizon_fade);
 

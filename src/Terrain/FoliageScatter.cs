@@ -213,7 +213,7 @@ public partial class FoliageScatter : MultiMeshInstance3D
             ScaleVariation = 0.25f
         });
 
-        // 为每个变体加载资产或构建回退网格，并创建 MultiMeshInstance3D
+        // 为每个变体加载资产或构建回退网格
         for (int i = 0; i < _variants.Count; i++)
         {
             var v = _variants[i];
@@ -221,51 +221,18 @@ public partial class FoliageScatter : MultiMeshInstance3D
             v.Mesh = mesh;
             v.Material = mat;
             v.BaseOffsetY = offsetY;
+        }
 
-            var mm = new MultiMesh
+        // 根节点挂载基础 MultiMesh 保持兼容性
+        if (_variants.Count > 0 && _variants[0].Mesh != null)
+        {
+            this.Multimesh = new MultiMesh
             {
                 TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
                 UseColors = false,
-                Mesh = mesh,
-                InstanceCount = v.TargetCount
+                Mesh = _variants[0].Mesh,
+                InstanceCount = 0
             };
-
-            if (i == 0)
-            {
-                // 主 MultiMeshInstance3D (this) 挂载第一个变体（橡木），保持向下兼容
-                this.Multimesh = mm;
-                if (mat != null) this.MaterialOverride = mat;
-                v.MeshInstance = this;
-            }
-            else
-            {
-                var subInst = new MultiMeshInstance3D
-                {
-                    Name = $"{v.VariantId}_MultiMesh",
-                    Multimesh = mm
-                };
-                if (mat != null) subInst.MaterialOverride = mat;
-                AddChild(subInst);
-                v.MeshInstance = subInst;
-            }
-
-            // GPU 性能调优：视距裁剪 (Visibility Range) 与阴影分离 (Shadow Casting)
-            if (!v.IsTree)
-            {
-                // 1. 地表野花与草丛：关闭动态平行光阴影投射（消除数百万阴影多边形重绘），仅在 90m 视距内渲染
-                v.MeshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.Off;
-                v.MeshInstance.VisibilityRangeEnd = 90.0f;
-                v.MeshInstance.VisibilityRangeEndMargin = 15.0f;
-                v.MeshInstance.VisibilityRangeFadeMode = GeometryInstance3D.VisibilityRangeFadeModeEnum.Self;
-            }
-            else
-            {
-                // 2. 树木：保留主干与树冠阴影投射，超出 260m 浓雾线后硬件自动渐隐剔除
-                v.MeshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
-                v.MeshInstance.VisibilityRangeEnd = 260.0f;
-                v.MeshInstance.VisibilityRangeEndMargin = 25.0f;
-                v.MeshInstance.VisibilityRangeFadeMode = GeometryInstance3D.VisibilityRangeFadeModeEnum.Self;
-            }
         }
     }
 
@@ -392,6 +359,20 @@ public partial class FoliageScatter : MultiMeshInstance3D
     {
         if (HeightSampler == null) return;
 
+        // 清除旧的空间分块 MultiMesh 子节点
+        var childrenToRemove = new List<Node>();
+        foreach (var child in GetChildren())
+        {
+            if (child is MultiMeshInstance3D mmi && child != _colliderContainer)
+            {
+                childrenToRemove.Add(child);
+            }
+        }
+        foreach (var c in childrenToRemove)
+        {
+            c.QueueFree();
+        }
+
         var rng = new Random(Seed);
         _totalValidInstances = 0;
         _totalRequestedInstances = 0;
@@ -408,12 +389,14 @@ public partial class FoliageScatter : MultiMeshInstance3D
         float spruceTotalH = 0.0f;
         int spruceCount = 0;
 
+        const float CellSize = 120.0f; // 空间分块网格大小 120m x 120m
+
         foreach (var v in _variants)
         {
             v.InstanceTransforms.Clear();
             v.GroundHeights.Clear();
             _totalRequestedInstances += v.TargetCount;
-            if (v.MeshInstance?.Multimesh == null) continue;
+            if (v.Mesh == null) continue;
 
             int validForVariant = 0;
             int attempts = 0;
@@ -469,7 +452,6 @@ public partial class FoliageScatter : MultiMeshInstance3D
                 float spawnY = wy + v.BaseOffsetY * scale;
                 var transform = new Transform3D(basis, new Vector3(wx, spawnY, wz));
 
-                v.MeshInstance.Multimesh.SetInstanceTransform(validForVariant, transform);
                 v.InstanceTransforms.Add(transform);
                 v.GroundHeights.Add(wy);
 
@@ -515,7 +497,51 @@ public partial class FoliageScatter : MultiMeshInstance3D
                 _totalValidInstances++;
             }
 
-            v.MeshInstance.Multimesh.VisibleInstanceCount = validForVariant;
+            // 空间网格分块 (Spatial Chunking) 生成局域 MultiMeshInstance3D
+            // 解决单节点 MultiMesh 导致 AABB 覆盖全岛而无法按视距剔除单株实例的硬伤
+            var cellBuckets = new Dictionary<(int cx, int cz), List<Transform3D>>();
+            for (int tIdx = 0; tIdx < v.InstanceTransforms.Count; tIdx++)
+            {
+                var tr = v.InstanceTransforms[tIdx];
+                int cx = (int)MathF.Floor((tr.Origin.X + 360.0f) / CellSize);
+                int cz = (int)MathF.Floor((tr.Origin.Z + 360.0f) / CellSize);
+                var key = (cx, cz);
+                if (!cellBuckets.TryGetValue(key, out var bucketList))
+                {
+                    bucketList = new List<Transform3D>();
+                    cellBuckets[key] = bucketList;
+                }
+                bucketList.Add(tr);
+            }
+
+            foreach (var (cellKey, cellTransforms) in cellBuckets)
+            {
+                if (cellTransforms.Count == 0) continue;
+                var cellMm = new MultiMesh
+                {
+                    TransformFormat = MultiMesh.TransformFormatEnum.Transform3D,
+                    UseColors = false,
+                    Mesh = v.Mesh,
+                    InstanceCount = cellTransforms.Count
+                };
+                for (int k = 0; k < cellTransforms.Count; k++)
+                {
+                    cellMm.SetInstanceTransform(k, cellTransforms[k]);
+                }
+                cellMm.VisibleInstanceCount = cellTransforms.Count;
+
+                var cellNode = new MultiMeshInstance3D
+                {
+                    Name = $"{v.VariantId}_Cell_{cellKey.cx}_{cellKey.cz}",
+                    Multimesh = cellMm,
+                    CastShadow = v.IsTree ? GeometryInstance3D.ShadowCastingSetting.On : GeometryInstance3D.ShadowCastingSetting.Off,
+                    VisibilityRangeEnd = v.IsTree ? 260.0f : 85.0f,
+                    VisibilityRangeEndMargin = 0.0f,
+                    VisibilityRangeFadeMode = GeometryInstance3D.VisibilityRangeFadeModeEnum.Disabled
+                };
+                if (v.Material != null) cellNode.MaterialOverride = v.Material;
+                AddChild(cellNode);
+            }
         }
 
         if (oakCount > 0) _oakAvgHeight = oakTotalH / oakCount;

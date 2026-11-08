@@ -44,9 +44,10 @@ func _process(delta: float) -> bool:
 		quit(1)
 		return true
 
-	# 2. 验证生成的植被实例总数与有效散布数
-	var count = mm.visible_instance_count
-	var total_instances = mm.instance_count
+	# 2. 验证生成的植被实例总数与有效散布数 (空间分块多网格汇总)
+	var summary: Dictionary = _foliage.GetScatterSummary()
+	var count = summary.get("valid_count", 0)
+	var total_instances = summary.get("requested_count", 0)
 	print("[Check 2] 实际有效植被散布数量: %d / %d (预期 > 500)" % [count, total_instances])
 	if count < 500:
 		push_error("FAILED: 有效植被散布数量过低: %d" % count)
@@ -55,7 +56,6 @@ func _process(delta: float) -> bool:
 		return true
 
 	# 3. 验证生态高度与水下过滤 (水下生长率必须为 0%)
-	var summary: Dictionary = _foliage.GetScatterSummary()
 	print("[Check 3] 散布生态统计: %s" % summary)
 
 	var water_spawns = summary.get("water_spawns", 0)

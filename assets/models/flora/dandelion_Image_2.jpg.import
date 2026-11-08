@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bytwjr77iqedl"
-path="res://.godot/imported/dandelion_Image_2.jpg-3ce2c65334097964aba345f7068ae157.ctex"
+path.s3tc="res://.godot/imported/dandelion_Image_2.jpg-3ce2c65334097964aba345f7068ae157.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "edace561700bea7e2208836d8a842467"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/flora/dandelion_Image_2.jpg"
-dest_files=["res://.godot/imported/dandelion_Image_2.jpg-3ce2c65334097964aba345f7068ae157.ctex"]
+dest_files=["res://.godot/imported/dandelion_Image_2.jpg-3ce2c65334097964aba345f7068ae157.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

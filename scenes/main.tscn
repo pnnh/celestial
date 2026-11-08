@@ -40,8 +40,8 @@ fog_enabled = true
 fog_mode = 1
 fog_light_color = Color(0.68, 0.82, 0.95, 1)
 fog_density = 0.005
-fog_depth_begin = 90.0
-fog_depth_end = 260.0
+fog_depth_begin = 180.0
+fog_depth_end = 360.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_muem4"]
 render_priority = 0
