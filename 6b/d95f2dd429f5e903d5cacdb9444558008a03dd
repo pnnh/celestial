@@ -1,0 +1,43 @@
+assets/models/flora/wild_grass_2.jpg
+  s_e196f514e0974e::t_781aa214e24c6c 1-3
+assets/models/trees/birch/birch_Image_1.jpg
+  s_9aefe4a2760245::t_9eabcdc73efa33 1-3
+assets/models/trees/oak/oak.glb
+  s_9aefe4a2760245::t_ed857d1c4e7d44 1-3
+assets/models/trees/oak/oak.glb.import
+  s_9aefe4a2760245::t_012ade46110f1e 1-45
+assets/models/trees/oak/oak_Image_1.jpg
+  s_9aefe4a2760245::t_c63ebbe17d9eb4 1-3
+assets/models/trees/oak/oak_Image_2.jpg
+  s_9aefe4a2760245::t_b468caeaeab22e 1-3
+assets/models/trees/spruce/spruce.glb.import
+  s_9aefe4a2760245::t_9b10b562851b5a 1-45
+assets/models/trees/spruce/spruce_Image_0.jpg
+  s_9aefe4a2760245::t_0d33530b9dc1be 1-3
+assets/models/trees/spruce/spruce_Image_2.jpg
+  s_9aefe4a2760245::t_4ba26a48656d81 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6bd95f2dd429f5e903d5cacdb9444558008a03dd",
+  "prompts": {},
+  "sessions": {
+    "s_9aefe4a2760245": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "48d90204-caa4-4c1c-8d56-1c633be7693d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "larry <xspanni@gmail.com>"
+    },
+    "s_e196f514e0974e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "39694778-279d-426d-bc5e-67d1f3fec2d5",
+        "model": "default"
+      },
+      "human_author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
