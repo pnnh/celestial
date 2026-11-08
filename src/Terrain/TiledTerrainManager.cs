@@ -15,7 +15,7 @@ namespace Celestial.Terrain;
 public partial class TiledTerrainManager : Node3D
 {
     [Export] public float TileSize { get; set; } = 64.0f;
-    [Export] public int ViewDistanceTiles { get; set; } = 5; // 切比雪夫半径 5 (覆盖约 640m 视野)
+    [Export] public int ViewDistanceTiles { get; set; } = 4; // 切比雪夫半径 4 (覆盖约 256m~280m 视野，活动瓦片 81 块，在 260m 浓雾线前无缝闭环)
     [Export] public int MaxMountPerFrame { get; set; } = 2;   // 每帧最多提交瓦片数
     [Export] public float MaxFrameTimeBudgetMs { get; set; } = 3.0f; // 单帧网格提交上限 3.0ms
 
@@ -157,8 +157,8 @@ public partial class TiledTerrainManager : Node3D
                 LODLevel targetLOD = chebyshev switch
                 {
                     <= 1 => LODLevel.LOD0_Near,
-                    <= 3 => LODLevel.LOD1_Mid,
-                    <= 5 => LODLevel.LOD2_Far,
+                    <= 2 => LODLevel.LOD1_Mid,
+                    <= 4 => LODLevel.LOD2_Far,
                     _ => LODLevel.Unloaded
                 };
 

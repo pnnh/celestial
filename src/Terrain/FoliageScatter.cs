@@ -260,10 +260,10 @@ public partial class FoliageScatter : MultiMeshInstance3D
             }
             else
             {
-                // 2. 树木：保留主干与树冠阴影投射，超出 320m 浓雾区后硬件自动渐隐剔除
+                // 2. 树木：保留主干与树冠阴影投射，超出 260m 浓雾线后硬件自动渐隐剔除
                 v.MeshInstance.CastShadow = GeometryInstance3D.ShadowCastingSetting.On;
-                v.MeshInstance.VisibilityRangeEnd = 320.0f;
-                v.MeshInstance.VisibilityRangeEndMargin = 30.0f;
+                v.MeshInstance.VisibilityRangeEnd = 260.0f;
+                v.MeshInstance.VisibilityRangeEndMargin = 25.0f;
                 v.MeshInstance.VisibilityRangeFadeMode = GeometryInstance3D.VisibilityRangeFadeModeEnum.Self;
             }
         }

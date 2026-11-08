@@ -41,7 +41,7 @@ void fragment() {
 
 	// 远景地平线与天际线平滑融合 (消除大洋网格方形拐角与硬切边)
 	float cam_dist = length(VERTEX);
-	float horizon_fade = smoothstep(180.0, 480.0, cam_dist);
+	float horizon_fade = smoothstep(100.0, 260.0, cam_dist);
 	vec3 horizon_color = vec3(0.68, 0.82, 0.95); // 对齐天空盒与大气透视雾色彩
 	final_color = mix(final_color, horizon_color, horizon_fade);
 
