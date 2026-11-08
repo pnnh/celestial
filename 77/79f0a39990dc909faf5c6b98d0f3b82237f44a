@@ -1,0 +1,19 @@
+docs/plan/open_world_terrain_and_streaming_architecture.md
+  s_e196f514e0974e::t_4f17c0b84b146d 188,190-197,199-200
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7779f0a39990dc909faf5c6b98d0f3b82237f44a",
+  "prompts": {},
+  "sessions": {
+    "s_e196f514e0974e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "39694778-279d-426d-bc5e-67d1f3fec2d5",
+        "model": "default"
+      },
+      "human_author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
