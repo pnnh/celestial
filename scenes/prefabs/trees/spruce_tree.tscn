@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://c9z2w3spruce01"]
+
+[ext_resource type="PackedScene" uid="uid://dvrf85v832kpb" path="res://assets/models/trees/spruce/spruce.glb" id="1_spruce_mesh"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_spruce"]
+height = 2.8
+radius = 0.28
+
+[node name="SpruceTree" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_spruce_mesh")]
+transform = Transform3D(7, 0, 0, 0, 7, 0, 0, 0, 7, 0, 3.4, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+shape = SubResource("CylinderShape3D_spruce")

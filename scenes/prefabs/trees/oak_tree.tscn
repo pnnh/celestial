@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://b8y1v2k3oak01"]
+
+[ext_resource type="PackedScene" uid="uid://lec2awuy3qdl" path="res://assets/models/trees/oak/oak.glb" id="1_oak_mesh"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_oak"]
+height = 2.4
+radius = 0.35
+
+[node name="OakTree" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_oak_mesh")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 3.0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+shape = SubResource("CylinderShape3D_oak")
