@@ -1,0 +1,22 @@
+docs/plan/open_world_terrain_and_streaming_architecture.md
+  h_6465a203f88bd5 188-198
+scenes/main.tscn
+  h_6465a203f88bd5 43-44
+shaders/ocean_water.gdshader
+  h_6465a203f88bd5 44
+src/Terrain/FoliageScatter.cs
+  h_6465a203f88bd5 263,265-266
+src/Terrain/TiledTerrainManager.cs
+  h_6465a203f88bd5 18,160-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9113ddbef1fe832e002f711d31925e484ca2b3d2",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
