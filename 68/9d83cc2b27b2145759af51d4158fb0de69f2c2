@@ -1,0 +1,88 @@
+.specify/feature.json
+  h_6465a203f88bd5 1-3
+LICENSE
+  h_6465a203f88bd5 1-653
+assets/models/tree/tree.glb
+  h_6465a203f88bd5 1-3
+assets/models/tree/tree.glb.import
+  h_6465a203f88bd5 1-45
+assets/models/tree/tree_0.png
+  h_6465a203f88bd5 1-3
+assets/models/tree/tree_0.png.import
+  h_6465a203f88bd5 1-44
+assets/models/tree/tree_1.png
+  h_6465a203f88bd5 1-3
+assets/models/tree/tree_1.png.import
+  h_6465a203f88bd5 1-44
+assets/textures/ludo/lush_grass_soil.png.import
+  h_6465a203f88bd5 6,8-9,15,19,27,41
+assets/textures/sand.png.import
+  h_6465a203f88bd5 6,8-9,15,19,27,41
+assets/textures/stone.png.import
+  h_6465a203f88bd5 6,8-9,15,19,27,41
+docs/plan/open_world_terrain_and_streaming_architecture.md
+  h_6465a203f88bd5 130-152
+project.godot
+  h_6465a203f88bd5 18-24
+scenes/main.tscn
+  h_6465a203f88bd5 1-19,22-27,36,39-107,110,114,117-120,123,125-129,131,136,141-142,144,147,150,153,156-166
+shaders/ocean_water.gdshader
+  h_6465a203f88bd5 41-47,49-51
+shaders/terrain_triplanar.gdshader
+  h_6465a203f88bd5 4-13,17-18,21,25-43,45,47,50
+specs/004-environment-and-foliage/checklists/requirements.md
+  h_6465a203f88bd5 1-35
+specs/004-environment-and-foliage/data-model.md
+  h_6465a203f88bd5 1-57
+specs/004-environment-and-foliage/plan.md
+  h_6465a203f88bd5 1-63
+specs/004-environment-and-foliage/quickstart.md
+  h_6465a203f88bd5 1-28
+specs/004-environment-and-foliage/research.md
+  h_6465a203f88bd5 1-65
+specs/004-environment-and-foliage/spec.md
+  h_6465a203f88bd5 1-107
+specs/004-environment-and-foliage/tasks.md
+  h_6465a203f88bd5 1-87
+src/Player/BedrockPhysicsDetector.cs
+  h_6465a203f88bd5 78-79,83
+src/Player/VoxelInteractor.cs
+  h_6465a203f88bd5 145-182
+src/Terrain/FoliageScatter.cs
+  h_6465a203f88bd5 1-256
+src/Terrain/FoliageScatter.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/OceanWaterPlane.cs
+  h_6465a203f88bd5 10,51-56
+src/Terrain/TiledTerrainManager.cs
+  h_6465a203f88bd5 14,23,43,47-61,64-71,81-100,108-112
+src/Voxel/VoxelWorld.cs
+  h_6465a203f88bd5 15,17-22,170,174
+tests/test_environment_atmosphere.gd
+  h_6465a203f88bd5 1-56
+tests/test_environment_atmosphere.gd.uid
+  h_6465a203f88bd5 1
+tests/test_foliage_scatter.gd
+  h_6465a203f88bd5 1-84
+tests/test_foliage_scatter.gd.uid
+  h_6465a203f88bd5 1
+tests/test_mountaintop_dig.gd
+  h_6465a203f88bd5 1-46
+tests/test_mountaintop_dig.gd.uid
+  h_6465a203f88bd5 1
+tests/test_triplanar_shader.gd
+  h_6465a203f88bd5 1-68
+tests/test_triplanar_shader.gd.uid
+  h_6465a203f88bd5 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "689d83cc2b27b2145759af51d4158fb0de69f2c2",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
