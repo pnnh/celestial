@@ -84,6 +84,8 @@ public partial class VoxelVolume : Node3D, IVoxelVolume
                     var coord = new ChunkCoord(cx, cy, cz);
                     var chunk = new VoxelChunk();
                     chunk.Initialize(coord, _sharedVoxelMaterial);
+                    // 修正局部坐标偏移：将全局 Chunk 世界坐标转换为相对于当前 VoxelVolume 节点的局部坐标，杜绝空间双重位移
+                    chunk.Position = coord.ToWorldPosition() - (IsInsideTree() ? GlobalPosition : Position);
                     AddChild(chunk);
                     _chunks[coord] = chunk;
                     GenerateChunkData(chunk);

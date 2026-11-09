@@ -16,18 +16,29 @@
 [ext_resource type="PackedScene" uid="uid://fcmebjb7n0j0" path="res://assets/models/ancient_monolith.glb" id="9_monolith"]
 [ext_resource type="Script" uid="uid://qtx0upwurodw" path="res://src/Voxel/VoxelVolume.cs" id="10_volume"]
 [ext_resource type="Script" uid="uid://rbvbmplxf0j" path="res://src/Terrain/FoliageScatter.cs" id="11_foliage"]
-[ext_resource type="PackedScene" uid="uid://d3iuhaxoqhhbf" path="res://assets/models/tree/tree.glb" id="17_jscy8"]
+[ext_resource type="Shader" path="res://shaders/celestial_sky.gdshader" id="18_sky"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
-sky_top_color = Color(0.35, 0.62, 0.96, 1)
-sky_horizon_color = Color(0.68, 0.82, 0.95, 1)
-sky_curve = 0.12
-ground_bottom_color = Color(0.08, 0.28, 0.58, 1)
-ground_horizon_color = Color(0.68, 0.82, 0.95, 1)
-ground_curve = 0.08
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sky"]
+shader = ExtResource("18_sky")
+shader_parameter/sky_top_color = Color(0.18, 0.52, 0.92, 1)
+shader_parameter/sky_horizon_color = Color(0.46, 0.68, 0.88, 1)
+shader_parameter/ground_bottom_color = Color(0.08, 0.28, 0.58, 1)
+shader_parameter/ground_horizon_color = Color(0.46, 0.68, 0.88, 1)
+shader_parameter/sky_curve = 0.55
+shader_parameter/sun_size = 0.045
+shader_parameter/sun_halo_size = 0.18
+shader_parameter/sun_color = Color(1, 0.99, 0.95, 1)
+shader_parameter/sun_halo_color = Color(1, 0.88, 0.65, 1)
+shader_parameter/cloud_scale = 0.065
+shader_parameter/cloud_speed = Vector2(0.003, 0.0015)
+shader_parameter/cloud_coverage = 0.42
+shader_parameter/cloud_softness = 0.06
+shader_parameter/cloud_opacity = 0.95
+shader_parameter/cloud_color_light = Color(1, 0.99, 0.96, 1)
+shader_parameter/cloud_color_shadow = Color(0.7, 0.8, 0.93, 1)
 
 [sub_resource type="Sky" id="Sky_sky"]
-sky_material = SubResource("ProceduralSkyMaterial_sky")
+sky_material = SubResource("ShaderMaterial_sky")
 
 [sub_resource type="Environment" id="Environment_env"]
 background_mode = 2
@@ -38,10 +49,11 @@ tonemap_mode = 2
 glow_enabled = true
 fog_enabled = true
 fog_mode = 1
-fog_light_color = Color(0.68, 0.82, 0.95, 1)
+fog_light_color = Color(0.46, 0.68, 0.88, 1)
 fog_density = 0.005
-fog_depth_begin = 180.0
-fog_depth_end = 360.0
+fog_sky_affect = 0.1
+fog_depth_begin = 140.0
+fog_depth_end = 340.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_muem4"]
 render_priority = 0
@@ -108,7 +120,7 @@ radius = 0.18017578
 script = ExtResource("1_main")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1304417894]
-transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 20, 0)
+transform = Transform3D(-0.819152, -0.353129, 0.451984, 0, 0.788011, 0.615662, -0.573576, 0.50432, -0.645501, 0, 20, 0)
 shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=475154696]
@@ -153,14 +165,3 @@ script = ExtResource("7_debug")
 [node name="SaveManager" type="Node" parent="." unique_id=1736316144 node_paths=PackedStringArray("World")]
 script = ExtResource("8_save")
 World = NodePath("../VoxelWorld")
-
-[node name="tree" parent="." unique_id=611740992 instance=ExtResource("17_jscy8")]
-transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 35.197147, 28.73794, -44.08551)
-
-[node name="StaticBody3D" type="StaticBody3D" parent="tree/world" parent_id_path=PackedInt32Array(611740992, 1789938168) index="1" unique_id=1013107685]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="tree/world/StaticBody3D" unique_id=1128128028]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.01663208, -0.010009766, 0.002708435)
-shape = SubResource("CylinderShape3D_pm3ni")
-
-[editable path="tree"]

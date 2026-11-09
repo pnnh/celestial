@@ -39,22 +39,26 @@ void fragment() {
 	if (water_depth < foam_distance && water_depth > 0.0) {
 		foam = 1.0 - smoothstep(0.0, foam_distance, water_depth);
 	}
+	// 关键：浪沫仅在近处海岸呈现，超出 120 米或远景消隐区平滑归零，严防远方地形截断处触发白色泡沫线
+	float cam_dist = length(VERTEX);
+	foam *= (1.0 - smoothstep(50.0, 120.0, cam_dist));
 
 	vec3 final_color = mix(base_color.rgb, foam_color.rgb, foam * 0.9);
 
-	// 远景地平线与天际线平滑融合 (消除大洋网格方形拐角与硬切边)
-	// 关键：内陆湖泊（海岛中心径向距离 < 260m）坚决不淡出为地平线白雾，保持清澈深蓝！
-	// 只有远离海岛本体的外围大洋边界（280m ~ 460m）且视距较远（> 180m）时才柔和消融进地平线
+	// 远景地平线与天际线平滑渐变融合 (消除大洋网格拐角、白带与硬切边)
 	float island_dist = length(v_world_pos.xz);
-	float ocean_radial_fade = smoothstep(280.0, 460.0, island_dist);
-	float cam_dist = length(VERTEX);
-	float cam_fade = smoothstep(180.0, 360.0, cam_dist);
-	float horizon_fade = ocean_radial_fade * cam_fade;
+	float island_radial_fade = smoothstep(180.0, 340.0, island_dist);
+	float cam_fade = smoothstep(140.0, 320.0, cam_dist);
+	float horizon_fade = clamp(max(island_radial_fade, cam_fade), 0.0, 1.0);
 
-	vec3 horizon_color = vec3(0.68, 0.82, 0.95); // 对齐天空盒与大气透视雾色彩
-	final_color = mix(final_color, horizon_color, horizon_fade);
+	// 统一天空与晨雾同款清爽天青蔚蓝中介色 (与 sky_horizon_color 及 fog_light_color 严格同色)
+	vec3 horizon_color = vec3(0.46, 0.68, 0.88);
 
-	ALBEDO = final_color;
+	// 关键光学解耦：
+	// 远景海面 ALBEDO 平滑衰减为 0，由 EMISSION 接管精准注入 horizon_color
+	// 彻底杜绝主平行光与环境光在远海平面叠加将材质照成高亮白，实现海天一色自然衔接
+	ALBEDO = mix(final_color, vec3(0.0), horizon_fade);
+	EMISSION = horizon_color * horizon_fade;
 	ALPHA = mix(base_color.a, 1.0, clamp(foam + horizon_fade, 0.0, 1.0));
 	ROUGHNESS = mix(0.2, 1.0, horizon_fade);
 	SPECULAR = mix(0.5, 0.0, horizon_fade);

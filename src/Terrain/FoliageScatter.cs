@@ -47,6 +47,7 @@ public partial class FoliageScatter : MultiMeshInstance3D
     public IHeightSampler? HeightSampler { get; set; }
 
     private readonly List<Aabb> _exclusionZones = new();
+    private readonly List<Aabb> _treeExclusionZones = new();
     private readonly List<FoliageVariantInfo> _variants = new();
     private Node3D? _colliderContainer;
 
@@ -325,32 +326,61 @@ public partial class FoliageScatter : MultiMeshInstance3D
         return (mesh, mat, 0.0f);
     }
 
+    public IReadOnlyList<Aabb> ExclusionZones => _exclusionZones;
+    public IReadOnlyList<Aabb> TreeExclusionZones => _treeExclusionZones;
+
     private void CollectExclusionZones()
     {
         _exclusionZones.Clear();
-        // 避开中心初始区域与古图腾遗迹
-        _exclusionZones.Add(new Aabb(new Vector3(-8, 5, -24), new Vector3(32, 30, 32)));
+        _treeExclusionZones.Clear();
+
+        // 1. 避开中心初始出生点与古图腾遗迹（全高度排除 + 水平安全缓冲）
+        var centerAabb = new Aabb(new Vector3(-12.0f, -100.0f, -28.0f), new Vector3(44.0f, 400.0f, 44.0f));
+        _exclusionZones.Add(centerAabb.Grow(6.0f));
+        _treeExclusionZones.Add(centerAabb.Grow(16.0f));
 
         var root = GetTree()?.Root;
         if (root == null) return;
 
-        // 避开 QuarryVolume 等局部体素卷
-        var volumes = root.FindChildren("*", "VoxelVolume", true, false);
-        foreach (var node in volumes)
+        // 2. 遍历场景中所有 3D 节点，强类型精准捕获 VoxelWorld 与 VoxelVolume 沙盒体素开采区
+        var allNodes = root.FindChildren("*", "Node3D", true, false);
+        foreach (var node in allNodes)
         {
-            if (node is Celestial.Voxel.VoxelVolume vol)
+            if (node is Celestial.Voxel.VoxelWorld vw)
             {
-                _exclusionZones.Add(vol.WorldBounds.Grow(4.0f));
+                // 计算 VoxelWorld 全局 Chunk 覆盖范围 (ChunkSize = 16)
+                float minX = -vw.RegionChunkRadiusX * Celestial.Core.Constants.ChunkSize;
+                float maxX = (vw.RegionChunkRadiusX + 1) * Celestial.Core.Constants.ChunkSize;
+                float minZ = -vw.RegionChunkRadiusZ * Celestial.Core.Constants.ChunkSize;
+                float maxZ = (vw.RegionChunkRadiusZ + 1) * Celestial.Core.Constants.ChunkSize;
+                Vector3 center = new((minX + maxX) * 0.5f, 50.0f, (minZ + maxZ) * 0.5f);
+                Vector3 size = new(maxX - minX, 400.0f, maxZ - minZ);
+                Aabb vwBounds = new(center - size * 0.5f, size);
+                _exclusionZones.Add(vwBounds.Grow(6.0f));
+                // 树木外延 16.0m 强隔离带，彻底杜绝 3D 树冠（模型放大后半径 6~8m）穿入或悬挂在沙盒方块上方
+                _treeExclusionZones.Add(vwBounds.Grow(16.0f));
+            }
+            else if (node is Celestial.Voxel.VoxelVolume vol)
+            {
+                Aabb wb = vol.WorldBounds;
+                // 将局部体素卷纵向扩展为全高度排除柱体
+                Aabb colAabb = new(
+                    new Vector3(wb.Position.X, -100.0f, wb.Position.Z),
+                    new Vector3(wb.Size.X, 400.0f, wb.Size.Z)
+                );
+                _exclusionZones.Add(colAabb.Grow(6.0f));
+                _treeExclusionZones.Add(colAabb.Grow(16.0f));
             }
         }
     }
 
-    private bool IsInExclusionZone(float x, float y, float z)
+    private bool IsInExclusionZone(float x, float y, float z, bool isTree = false)
     {
         var pt = new Vector3(x, y, z);
-        for (int i = 0; i < _exclusionZones.Count; i++)
+        var zones = isTree ? _treeExclusionZones : _exclusionZones;
+        for (int i = 0; i < zones.Count; i++)
         {
-            if (_exclusionZones[i].HasPoint(pt)) return true;
+            if (zones[i].HasPoint(pt)) return true;
         }
         return false;
     }
@@ -433,8 +463,8 @@ public partial class FoliageScatter : MultiMeshInstance3D
                     continue;
                 }
 
-                // 避让体素采矿区与古遗迹
-                if (IsInExclusionZone(wx, wy, wz))
+                // 避让体素采矿区与古遗迹（对树木应用 16m 树冠保护隔离带）
+                if (IsInExclusionZone(wx, wy, wz, v.IsTree))
                 {
                     _exclusionCandidatesRejected++;
                     continue;
@@ -569,7 +599,7 @@ public partial class FoliageScatter : MultiMeshInstance3D
                 if (h < minH) minH = h;
                 if (h > maxH) maxH = h;
                 if (h < MinSpawnHeight) waterSpawns++;
-                if (IsInExclusionZone(t.Origin.X, h, t.Origin.Z)) exclusionViolations++;
+                if (IsInExclusionZone(t.Origin.X, h, t.Origin.Z, v.IsTree)) exclusionViolations++;
             }
         }
 
