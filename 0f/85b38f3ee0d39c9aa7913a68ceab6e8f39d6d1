@@ -1,0 +1,30 @@
+docs/plan/open_world_terrain_and_streaming_architecture.md
+  h_6465a203f88bd5 184-188,190,192-203,210-211
+scenes/main.tscn
+  h_6465a203f88bd5 19-38,41,52,54-56,123
+shaders/celestial_sky.gdshader
+  h_6465a203f88bd5 1-102
+shaders/celestial_sky.gdshader.uid
+  h_6465a203f88bd5 1
+shaders/ocean_water.gdshader
+  h_6465a203f88bd5 42-44,48,50-52,54-55,57-61
+src/Terrain/FoliageScatter.cs
+  h_6465a203f88bd5 50,329-331,335-340,345-347,349-363,365-372,377,380-381,383,466-467,602
+src/Terrain/TiledTerrainManager.cs
+  h_6465a203f88bd5 18
+src/Voxel/VoxelVolume.cs
+  h_6465a203f88bd5 87-88
+tests/test_environment_atmosphere.gd
+  h_6465a203f88bd5 24-25,29-45,51-53,57-58,61-62,66-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0f85b38f3ee0d39c9aa7913a68ceab6e8f39d6d1",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
