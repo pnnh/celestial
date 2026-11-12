@@ -54,13 +54,11 @@ void fragment() {
 	// 统一天空与晨雾同款清爽天青蔚蓝中介色 (与 sky_horizon_color 及 fog_light_color 严格同色)
 	vec3 horizon_color = vec3(0.46, 0.68, 0.88);
 
-	// 关键光学解耦：
-	// 远景海面 ALBEDO 平滑衰减为 0，由 EMISSION 接管精准注入 horizon_color
-	// 彻底杜绝主平行光与环境光在远海平面叠加将材质照成高亮白，实现海天一色自然衔接
-	ALBEDO = mix(final_color, vec3(0.0), horizon_fade);
-	EMISSION = horizon_color * horizon_fade;
-	ALPHA = mix(base_color.a, 1.0, clamp(foam + horizon_fade, 0.0, 1.0));
-	ROUGHNESS = mix(0.2, 1.0, horizon_fade);
+	// 关键：彻底禁用自发光 (EMISSION = 0)，防止触发 Glow/Bloom 产生刺眼高亮白带
+	// 远景海面材质通过 ALBEDO 柔和过渡到地平线天青蓝，并平滑衰减高光与镜面反射
+	ALBEDO = mix(final_color, horizon_color, horizon_fade);
+	ROUGHNESS = mix(0.2, 0.95, horizon_fade);
 	SPECULAR = mix(0.5, 0.0, horizon_fade);
+	ALPHA = mix(base_color.a, 1.0, clamp(foam + horizon_fade, 0.0, 1.0));
 }
 

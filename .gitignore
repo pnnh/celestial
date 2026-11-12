@@ -79,3 +79,7 @@ design/**/*.pyc
 design/**/.venv/
 design/**/work/
 assets_raw/work/
+
+
+__pycache__/
+.pytest_cache/

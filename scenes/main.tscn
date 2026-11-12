@@ -146,15 +146,15 @@ TiledTerrain = NodePath("../TiledTerrainManager")
 RegionChunkHeight = 2
 
 [node name="QuarryVolume" type="Node3D" parent="." unique_id=183553826]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 14, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 28, 0)
 script = ExtResource("10_volume")
 VolumeId = "quarry_plain_01"
 
 [node name="AncientMonolith" parent="." unique_id=207033718 instance=ExtResource("9_monolith")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 12, 18.55, -12)
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 12, 46.16, -12)
 
 [node name="Player" parent="." unique_id=624685075 instance=ExtResource("5_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50, 0)
 
 [node name="HUDOverlay" type="CanvasLayer" parent="." unique_id=1780351770]
 script = ExtResource("6_hud")

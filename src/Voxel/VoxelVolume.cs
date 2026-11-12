@@ -27,6 +27,30 @@ public partial class VoxelVolume : Node3D, IVoxelVolume
         }
     }
 
+    /// <summary>
+    /// 获取当前体素卷所有已生成 Chunk 的实际世界物理包围盒
+    /// </summary>
+    public Aabb RealWorldBounds
+    {
+        get
+        {
+            if (_chunks.Count == 0) return WorldBounds;
+            Vector3 min = new(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new(float.MinValue, float.MinValue, float.MinValue);
+            foreach (var chunk in _chunks.Values)
+            {
+                Vector3 cp = chunk.IsInsideTree() ? chunk.GlobalPosition : (Position + chunk.Position);
+                min.X = Math.Min(min.X, cp.X);
+                min.Y = Math.Min(min.Y, cp.Y);
+                min.Z = Math.Min(min.Z, cp.Z);
+                max.X = Math.Max(max.X, cp.X + Constants.ChunkSize);
+                max.Y = Math.Max(max.Y, cp.Y + Constants.ChunkSize);
+                max.Z = Math.Max(max.Z, cp.Z + Constants.ChunkSize);
+            }
+            return new Aabb(min, max - min);
+        }
+    }
+
     private readonly Dictionary<ChunkCoord, VoxelChunk> _chunks = new();
     private readonly HashSet<ChunkCoord> _dirtyChunks = new();
     private readonly Dictionary<Vector3I, byte> _modifications = new();
@@ -69,11 +93,11 @@ public partial class VoxelVolume : Node3D, IVoxelVolume
     {
         Aabb bounds = WorldBounds;
         int minChunkX = (int)MathF.Floor(bounds.Position.X / Constants.ChunkSize);
-        int maxChunkX = (int)MathF.Floor((bounds.Position.X + bounds.Size.X) / Constants.ChunkSize);
+        int maxChunkX = (int)MathF.Floor((bounds.Position.X + bounds.Size.X - 0.001f) / Constants.ChunkSize);
         int minChunkY = (int)MathF.Floor(bounds.Position.Y / Constants.ChunkSize);
-        int maxChunkY = (int)MathF.Floor((bounds.Position.Y + bounds.Size.Y) / Constants.ChunkSize);
+        int maxChunkY = (int)MathF.Floor((bounds.Position.Y + bounds.Size.Y - 0.001f) / Constants.ChunkSize);
         int minChunkZ = (int)MathF.Floor(bounds.Position.Z / Constants.ChunkSize);
-        int maxChunkZ = (int)MathF.Floor((bounds.Position.Z + bounds.Size.Z) / Constants.ChunkSize);
+        int maxChunkZ = (int)MathF.Floor((bounds.Position.Z + bounds.Size.Z - 0.001f) / Constants.ChunkSize);
 
         for (int cx = minChunkX; cx <= maxChunkX; cx++)
         {

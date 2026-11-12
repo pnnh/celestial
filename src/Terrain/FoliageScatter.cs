@@ -337,7 +337,7 @@ public partial class FoliageScatter : MultiMeshInstance3D
         // 1. 避开中心初始出生点与古图腾遗迹（全高度排除 + 水平安全缓冲）
         var centerAabb = new Aabb(new Vector3(-12.0f, -100.0f, -28.0f), new Vector3(44.0f, 400.0f, 44.0f));
         _exclusionZones.Add(centerAabb.Grow(6.0f));
-        _treeExclusionZones.Add(centerAabb.Grow(16.0f));
+        _treeExclusionZones.Add(centerAabb.Grow(24.0f));
 
         var root = GetTree()?.Root;
         if (root == null) return;
@@ -357,19 +357,19 @@ public partial class FoliageScatter : MultiMeshInstance3D
                 Vector3 size = new(maxX - minX, 400.0f, maxZ - minZ);
                 Aabb vwBounds = new(center - size * 0.5f, size);
                 _exclusionZones.Add(vwBounds.Grow(6.0f));
-                // 树木外延 16.0m 强隔离带，彻底杜绝 3D 树冠（模型放大后半径 6~8m）穿入或悬挂在沙盒方块上方
-                _treeExclusionZones.Add(vwBounds.Grow(16.0f));
+                // 树木外延 24.0m 强隔离带，彻底杜绝 3D 树冠（模型放大后半径 6~8.5m）穿入或悬挂在沙盒方块上方
+                _treeExclusionZones.Add(vwBounds.Grow(24.0f));
             }
             else if (node is Celestial.Voxel.VoxelVolume vol)
             {
-                Aabb wb = vol.WorldBounds;
+                Aabb wb = vol.RealWorldBounds;
                 // 将局部体素卷纵向扩展为全高度排除柱体
                 Aabb colAabb = new(
                     new Vector3(wb.Position.X, -100.0f, wb.Position.Z),
                     new Vector3(wb.Size.X, 400.0f, wb.Size.Z)
                 );
                 _exclusionZones.Add(colAabb.Grow(6.0f));
-                _treeExclusionZones.Add(colAabb.Grow(16.0f));
+                _treeExclusionZones.Add(colAabb.Grow(24.0f));
             }
         }
     }

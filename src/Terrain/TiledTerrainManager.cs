@@ -37,8 +37,21 @@ public partial class TiledTerrainManager : Node3D
 
     public override void _Ready()
     {
-        // 1. 若外部未注入采样器，默认创建千米海岛采样器
-        HeightSampler ??= new IslandHeightSampler();
+        // 1. 若外部未注入采样器，优先加载《上古卷轴》风格预制高精高度场 (HeightmapTextureSampler)
+        if (HeightSampler == null)
+        {
+            var heightmapSampler = new HeightmapTextureSampler();
+            if (heightmapSampler.IsLoaded)
+            {
+                HeightSampler = heightmapSampler;
+                GD.Print("[TiledTerrainManager] 已绑定 3D 预制高精手绘高度场 (HeightmapTextureSampler)");
+            }
+            else
+            {
+                HeightSampler = new IslandHeightSampler();
+                GD.Print("[TiledTerrainManager] 回退绑定数学程序化海岛采样器 (IslandHeightSampler)");
+            }
+        }
 
         // 2. 加载赛璐璐三平面地表着色材质并绑定手绘贴图
         var shader = GD.Load<Shader>("res://shaders/terrain_triplanar.gdshader");
