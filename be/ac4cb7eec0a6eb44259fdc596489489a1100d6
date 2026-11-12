@@ -1,0 +1,78 @@
+.gitattributes
+  h_6465a203f88bd5 67-69
+.gitignore
+  h_6465a203f88bd5 82-85
+assets/textures/heightmaps/concept_heightmap_1.png
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_1.png.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_1.webp
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_1.webp.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_2.png
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_2.png.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_2.webp
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_2.webp.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_3.png
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_3.png.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_3.webp
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_3.webp.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_4.png
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_4.png.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/concept_heightmap_4.webp
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/concept_heightmap_4.webp.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/island_heightmap_16bit.f32
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/island_heightmap_16bit.png
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/island_heightmap_16bit.png.import
+  h_6465a203f88bd5 1-40
+assets/textures/heightmaps/island_splatmap.png
+  h_6465a203f88bd5 1-3
+assets/textures/heightmaps/island_splatmap.png.import
+  h_6465a203f88bd5 1-40
+scenes/main.tscn
+  h_6465a203f88bd5 149,154,157
+scripts/process_terrain_blender.py
+  h_6465a203f88bd5 1-231
+shaders/ocean_water.gdshader
+  h_6465a203f88bd5 57-60,62
+src/Terrain/FoliageScatter.cs
+  h_6465a203f88bd5 340,360-361,365,372
+src/Terrain/HeightmapTextureSampler.cs
+  h_6465a203f88bd5 1-181
+src/Terrain/HeightmapTextureSampler.cs.uid
+  h_6465a203f88bd5 1
+src/Terrain/TiledTerrainManager.cs
+  h_6465a203f88bd5 40-54
+src/Voxel/VoxelVolume.cs
+  h_6465a203f88bd5 30-53,96,98,100
+tests/test_heightmap_texture_sampler.gd
+  h_6465a203f88bd5 1-59
+tests/test_heightmap_texture_sampler.gd.uid
+  h_6465a203f88bd5 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "beac4cb7eec0a6eb44259fdc596489489a1100d6",
+  "prompts": {},
+  "humans": {
+    "h_6465a203f88bd5": {
+      "author": "larry <xspanni@gmail.com>"
+    }
+  }
+}
